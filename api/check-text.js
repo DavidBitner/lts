@@ -58,7 +58,7 @@ REGRAS OBRIGATÓRIAS:
 
 18. Nunca invente uma correção apenas para produzir uma alteração. Se o texto estiver correto, retorne o texto original sem alterações.
 
-19. NÃO altere o "X" em expressões do tipo "Coletivo X Auto", "Coletivo X Coletivo", "Coletivo X Pedestre" e variações semelhantes. Esse "X" é terminologia padrão de ocorrência (equivalente a "colidiu com") e não deve ser expandido, substituído por outra palavra ("com", "e", "por" etc.) nem ter sua capitalização alterada.
+19. Expressões no formato "<termo> X <termo>", como "Colisão X Auto", "Colisão X Coletivo", "Coletivo X Auto", "Coletivo X Coletivo" e "Coletivo X Pedestre", são terminologia padrão de ocorrência. Nelas, o "X" é intencional e faz parte da terminologia. NÃO expanda nem substitua o "X" (por "com", "e", "por" etc.), NÃO altere sua capitalização e, principalmente, NÃO troque nem uniformize as palavras antes e depois dele: "Colisão" e "Coletivo" são termos distintos e cada um deve ser mantido exatamente como o autor escreveu. Nunca transforme "Colisão X ..." em "Coletivo X ..." nem o contrário.
 
 FORMATO DE ENTRADA:
 
