@@ -1453,10 +1453,34 @@
     const btnApplyCoords = byId("btn-coords-apply");
     const inputCoords = byId("coords-input");
 
+    const coordsStatus = byId("coords-status");
+    const updateCoordsStatus = () => {
+      if (!coordsStatus || !inputCoords) return;
+      const text = inputCoords.value.trim();
+      const c = text ? extractCoordinates(text) : null;
+      coordsStatus.className = "coords-status";
+      if (!text) {
+        coordsStatus.textContent = "Aguardando você colar as coordenadas...";
+      } else if (c) {
+        coordsStatus.classList.add("ok");
+        coordsStatus.textContent = `\u2713 Latitude ${c.lat.toFixed(6)} \u00b7 Longitude ${c.lng.toFixed(6)} \u2014 agora é só clicar em PROCESSAR`;
+      } else {
+        coordsStatus.classList.add("bad");
+        coordsStatus.textContent =
+          "Não encontrei as coordenadas. Copie as duas linhas (Latitude e Longitude) e cole de novo.";
+      }
+      if (btnApplyCoords) btnApplyCoords.classList.toggle("is-disabled", !c);
+    };
+    if (inputCoords) {
+      inputCoords.addEventListener("input", updateCoordsStatus);
+      inputCoords.addEventListener("paste", () => setTimeout(updateCoordsStatus, 0));
+    }
+
     if (btnOpenCoords) {
       btnOpenCoords.addEventListener("click", (e) => {
         e.preventDefault();
         if (inputCoords) inputCoords.value = "";
+        updateCoordsStatus();
         if (modalCoords) {
           modalCoords.classList.add("show");
           setTimeout(() => inputCoords && inputCoords.focus(), 100);

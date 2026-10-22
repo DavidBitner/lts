@@ -1654,3 +1654,130 @@ td {
 .button.btn-add:hover .front {
   background: var(--accent-light);
 }
+
+/* Guia do modal de coordenadas */
+#modal-coords .modal-content {
+  max-width: 640px !important;
+}
+
+.coords-guide {
+  display: flex;
+  gap: 18px;
+  align-items: flex-start;
+  margin-bottom: 14px;
+}
+
+.coords-steps {
+  flex: 1;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  font-size: 14px;
+  line-height: 1.45;
+  color: var(--text);
+}
+
+.coords-steps li {
+  display: flex;
+  gap: 10px;
+  align-items: flex-start;
+}
+
+.coords-num {
+  flex-shrink: 0;
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  background: var(--accent);
+  color: #000;
+  font-weight: 700;
+  font-size: 13px;
+}
+
+.coords-steps kbd {
+  display: inline-block;
+  padding: 1px 7px;
+  border: 1px solid var(--border);
+  border-bottom-width: 2px;
+  border-radius: 5px;
+  background: var(--surface-2);
+  font-family: inherit;
+  font-size: 12px;
+}
+
+.coords-mock {
+  flex-shrink: 0;
+  width: 230px;
+  border-radius: 6px;
+  overflow: hidden;
+  background: #fff;
+  color: #222;
+  font-size: 11px;
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.6);
+}
+
+.coords-mock-head {
+  padding: 6px 10px;
+  text-align: center;
+  background: #f1f1f1;
+  border-bottom: 1px solid #ddd;
+  font-size: 12px;
+}
+
+.coords-mock-body {
+  padding: 8px 10px;
+}
+
+.coords-mock-line {
+  margin: 3px 0;
+}
+
+.coords-sel {
+  background: #1a73e8;
+  color: #fff;
+  padding: 1px 2px;
+  outline: 2px solid var(--accent);
+  outline-offset: 1px;
+}
+
+.coords-mock-tip {
+  padding: 5px 10px;
+  background: var(--accent);
+  color: #000;
+  font-weight: 700;
+  text-align: center;
+}
+
+.coords-status {
+  min-height: 20px;
+  margin: 8px 0 0;
+  font-size: 13px;
+  color: var(--muted);
+}
+
+.coords-status.ok {
+  color: var(--ok);
+}
+
+.coords-status.bad {
+  color: var(--danger);
+}
+
+.button.is-disabled {
+  opacity: 0.45;
+  filter: grayscale(0.5);
+}
+
+@media (max-width: 600px) {
+  .coords-guide {
+    flex-direction: column;
+  }
+  .coords-mock {
+    width: 100%;
+  }
+}

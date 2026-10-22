@@ -464,17 +464,43 @@
     <div id="modal-coords" class="modal">
       <div class="modal-content" style="max-width: 500px">
         <h3>Insira Coordenadas</h3>
-        <p style="color: var(--muted); margin-bottom: 15px">
-          Cole as informações de GPS abaixo. O sistema identificará a Latitude e
-          Longitude automaticamente.
-        </p>
+        <div class="coords-guide">
+          <ol class="coords-steps">
+            <li>
+              <span class="coords-num">1</span>
+              <div>No mapa do SIM, <strong>clique no ponto</strong> do local. Vai abrir a janela <strong>Informações</strong>.</div>
+            </li>
+            <li>
+              <span class="coords-num">2</span>
+              <div>
+                Com o mouse, <strong>selecione</strong> as linhas
+                <strong>Latitude</strong> e <strong>Longitude</strong> (arraste de <em>Latitude</em> até o fim do número da longitude) e aperte
+                <kbd>Ctrl</kbd> + <kbd>C</kbd>.
+              </div>
+            </li>
+            <li>
+              <span class="coords-num">3</span>
+              <div>Clique na caixa abaixo e aperte <kbd>Ctrl</kbd> + <kbd>V</kbd>.</div>
+            </li>
+          </ol>
+          <div class="coords-mock" aria-hidden="true">
+            <div class="coords-mock-head">Informações</div>
+            <div class="coords-mock-body">
+              <div class="coords-mock-line"><b>Trecho:</b> ESTR. DO ALVARENGA</div>
+              <div class="coords-mock-line"><span class="coords-sel"><b>Latitude:</b> -23.70785040531621</span></div>
+              <div class="coords-mock-line"><span class="coords-sel"><b>Longitude:</b> -46.64103984832764</span></div>
+            </div>
+            <div class="coords-mock-tip">Selecione estas 2 linhas</div>
+          </div>
+        </div>
         <textarea
           id="coords-input"
-          rows="5"
+          rows="4"
           class="full-width"
-          placeholder="Exemplo: Latitude: -23.8408... Longitude: -46.7194..."
+          placeholder="Clique aqui e cole (Ctrl + V)"
           style="font-family: monospace; font-size: 14px"
         ></textarea>
+        <p id="coords-status" class="coords-status" aria-live="polite">Aguardando você colar as coordenadas...</p>
         <p class="warning-msg">
           <strong>Atenção:</strong> Nem sempre o endereço retornado pelo GPS
           estará 100% correto (especialmente em áreas rurais ou sem numeração
