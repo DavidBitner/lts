@@ -550,22 +550,22 @@
     box.innerHTML = "";
 
     const list = people[kind];
+    box.classList.toggle("is-multi", list.length > 1);
     list.forEach((person, idx) => {
       const entry = document.createElement("div");
       entry.className = "person-entry";
 
-      const head = document.createElement("div");
-      head.className = "person-head";
-      const title = document.createElement("h5");
-      title.textContent =
-        list.length > 1 ? `${cfg.title} ${idx + 1}` : cfg.title;
-      head.appendChild(title);
-
       if (list.length > 1) {
+        const head = document.createElement("div");
+        head.className = "person-head";
+        const title = document.createElement("h5");
+        title.textContent = `${cfg.title} ${idx + 1}`;
+        head.appendChild(title);
+
         const btnRemove = document.createElement("button");
         btnRemove.type = "button";
-        btnRemove.className = "button";
-        btnRemove.innerHTML = `<span class="shadow"></span><span class="edge"></span><div class="front" style="background:#777; padding:8px 16px; font-size:0.9rem"><span>REMOVER</span></div>`;
+        btnRemove.className = "person-remove";
+        btnRemove.textContent = "Remover";
         btnRemove.addEventListener("click", () => {
           list.splice(idx, 1);
           savePeople();
@@ -573,11 +573,16 @@
           refreshBoxes();
         });
         head.appendChild(btnRemove);
+        entry.appendChild(head);
       }
-      entry.appendChild(head);
+
+      const fields = document.createElement("div");
+      fields.className = "person-fields";
 
       cfg.fields.forEach(([key, label]) => {
         const inputId = `person-${kind}-${idx}-${key}`;
+        const wrap = document.createElement("div");
+        wrap.className = key === "Name" ? "field field-name" : "field";
         const lab = document.createElement("label");
         lab.htmlFor = inputId;
         lab.textContent = label + ":";
@@ -593,10 +598,12 @@
           refreshBoxes();
         });
 
-        entry.appendChild(lab);
-        entry.appendChild(input);
+        wrap.appendChild(lab);
+        wrap.appendChild(input);
+        fields.appendChild(wrap);
       });
 
+      entry.appendChild(fields);
       box.appendChild(entry);
     });
   }
@@ -853,10 +860,11 @@
   }
 
   function refreshBoxes() {
+    const boxLabels = { "box-nOc": "Nº OC" };
     const setBox = (id, value) => {
       const out = byId(id);
       if (out)
-        out.innerHTML = `<span class="label">${id.replace("box-", "")}:</span> ${escapeHtml(value)}`;
+        out.innerHTML = `<span class="label">${boxLabels[id] || id.replace("box-", "")}:</span> ${escapeHtml(value)}`;
     };
     const joinDrivers = (key) =>
       (people.driver || [])
@@ -864,6 +872,7 @@
         .filter(nonEmpty)
         .join(" / ");
 
+    setBox("box-nOc", byId("nOc")?.value || "");
     setBox("box-coletivo", byId("coletivo")?.value || "");
     setBox("box-logradouro", byId("logradouro")?.value || "");
     setBox("box-condutor", joinDrivers("Name"));
@@ -871,7 +880,7 @@
   }
 
   function wireBoxes() {
-    ["coletivo", "logradouro"].forEach((id) =>
+    ["nOc", "coletivo", "logradouro"].forEach((id) =>
       byId(id)?.addEventListener("input", refreshBoxes),
     );
     refreshBoxes();
