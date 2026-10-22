@@ -3,250 +3,345 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Formulario de Interferências</title>
+    <title>Formulário de Interferências</title>
     <link rel="stylesheet" href="style.css" />
     <link rel="icon" type="image/png" href="logo.png" />
   </head>
 
   <body>
-    <div class="form-container">
-      <h2>Formulário de Interferências</h2>
-
-      <h3>Geral</h3>
-      <section class="form-section">
-        <label for="nOc">Nº OC (Formato: 6C****):</label>
-        <input
-          type="text"
-          id="nOc"
-          name="nOc"
-          pattern="^6C\d{4}$"
-          required
-          placeholder="6C1234"
-        />
-        <small id="nOcError"
-          >Por favor, insira um número de OC válido (Formato: 6C****)</small
-        >
-      </section>
-
-      <section class="form-section">
-        <label for="ocorrencia"
-          >Ocorrência (ex: Acidente entre terceiros, Instabilidade Sistema SIM,
-          Obras de recapeamento):</label
-        >
-        <input
-          type="text"
-          id="ocorrencia"
-          name="ocorrencia"
-          required
-          placeholder="Descrição da Ocorrência"
-        />
-        <small id="ocorrenciaError"
-          >Por favor, insira um tipo de ocorrência</small
-        >
-      </section>
-
-      <section class="form-section">
-        <label for="date">Data:</label>
-        <input
-          type="text"
-          inputmode="numeric"
-          maxlength="10"
-          autocomplete="off"
-          id="date"
-          name="date"
-          required
-          placeholder="DD/MM/AAAA"
-        />
-      </section>
-
-      <section class="form-section">
-        <label for="inicio">Início:</label>
-        <input
-          type="text"
-          inputmode="numeric"
-          maxlength="5"
-          autocomplete="off"
-          id="inicio"
-          name="inicio"
-          placeholder="HH:MM"
-          required
-        />
-
-        <label for="termino">Término:</label>
-        <input
-          type="text"
-          inputmode="numeric"
-          maxlength="5"
-          autocomplete="off"
-          id="termino"
-          name="termino"
-          placeholder="HH:MM"
-        />
-      </section>
-
-      <section class="form-section">
-        <label for="logradouro">Logradouro (Endereço do ocorrido):</label>
-        <div class="input-with-button">
-          <input
-            type="text"
-            id="logradouro"
-            name="logradouro"
-            required
-            placeholder="Endereço onde ocorreu a ocorrência"
+    <header class="topbar">
+      <a class="back-home-btn" href="../../" aria-label="Voltar ao início">
+        <svg viewBox="0 0 24 24" width="24" height="24" aria-hidden="true">
+          <path
+            fill="currentColor"
+            d="M12 2l2.6 2.7L17 2l2 5.6V14l-3.8-1.6L12 20l-3.2-7.6L5 14V7.6L7 2l2.4 2.7L12 2z"
           />
-          <button
-            type="button"
-            id="btn-open-coords"
-            class="button-icon"
-            title="Inserir Coordenadas"
-          >
-            <svg viewBox="0 0 24 24" width="24" height="24" fill="currentColor">
-              <path
-                d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"
-              />
-            </svg>
-          </button>
+          <path
+            fill="currentColor"
+            d="M8.4 9.8L6 12.4l3.3-.4L9 11c.3-.7-.1-1.5-.6-1.2zM15.6 9.8l.3 1.2 3.1.4-2.4-2.6c-.6-.3-1 .5-.6 1z"
+          />
+        </svg>
+      </a>
+      <h1 class="topbar-title">Formulário de Interferências</h1>
+
+      <div class="opts">
+        <label class="sr-only" for="opt-action">Opções</label>
+        <select id="opt-action" class="opts-select">
+          <option value="">— opções —</option>
+          <option value="clear-all">LIMPAR TUDO</option>
+          <option value="sim-instabilidade">
+            INSTABILIDADE NO SISTEMA SIM
+          </option>
+          <option value="festividade-popular">FESTIVIDADE POPULAR</option>
+          <option value="acidente-terceiros">ACIDENTE ENTRE TERCEIROS</option>
+          <option value="alagamento">ALAGAMENTO</option>
+          <option value="geral">GERAL</option>
+        </select>
+        <button id="opt-apply" type="button" class="opts-apply">APLICAR</button>
+      </div>
+    </header>
+
+    <main class="form-container">
+      <section class="card" id="sec-identificacao">
+        <header class="card-head"><h3>Identificação</h3></header>
+        <div class="grid">
+          <div class="field col-3">
+            <label for="nOc">Nº OC <span class="hint">6C****</span></label>
+            <input
+              type="text"
+              id="nOc"
+              name="nOc"
+              pattern="^6C\d{4}$"
+              required
+              placeholder="6C1234"
+            />
+            <small id="nOcError"
+              >Por favor, insira um número de OC válido (Formato: 6C****)</small
+            >
+          </div>
+          <div class="field col-9">
+            <label for="ocorrencia">Ocorrência</label>
+            <input
+              type="text"
+              id="ocorrencia"
+              name="ocorrencia"
+              required
+              placeholder="Ex: Acidente entre terceiros, Instabilidade Sistema SIM, Obras de recapeamento"
+            />
+            <small id="ocorrenciaError"
+              >Por favor, insira um tipo de ocorrência</small
+            >
+          </div>
         </div>
-        <small id="logradouroError">Por favor, insira um endereço válido</small>
       </section>
 
-      <section class="form-section">
-        <label for="numero">Nº (Número do endereço):</label>
-        <input
-          type="text"
-          id="numero"
-          name="numero"
-          pattern="^\d+$"
-          required
-          placeholder="Número do endereço"
-        />
-        <small id="numeroError"
-          >Por favor, insira um número de endereço válido</small
-        >
-      </section>
+      <div class="card-row">
+        <section class="card" id="sec-horario">
+          <header class="card-head"><h3>Data e horário</h3></header>
+          <div class="grid">
+            <div class="field col-12">
+              <label for="date">Data</label>
+              <input
+                type="text"
+                id="date"
+                name="date"
+                inputmode="numeric"
+                maxlength="10"
+                autocomplete="off"
+                required
+                placeholder="DD/MM/AAAA"
+              />
+            </div>
+            <div class="field col-6">
+              <label for="inicio">Início</label>
+              <input
+                type="text"
+                id="inicio"
+                name="inicio"
+                inputmode="numeric"
+                maxlength="5"
+                autocomplete="off"
+                required
+                placeholder="HH:MM"
+              />
+            </div>
+            <div class="field col-6">
+              <label for="termino">Término</label>
+              <input
+                type="text"
+                id="termino"
+                name="termino"
+                inputmode="numeric"
+                maxlength="5"
+                autocomplete="off"
+                placeholder="HH:MM"
+              />
+            </div>
+          </div>
+        </section>
 
-      <section class="form-section">
-        <label for="bairro">Bairro:</label>
-        <input
-          type="text"
-          id="bairro"
-          name="bairro"
-          required
-          placeholder="Bairro da ocorrência"
-        />
-        <small id="bairroError">Por favor, insira um bairro válido</small>
-      </section>
+        <section class="card" id="sec-endereco">
+          <header class="card-head">
+            <h3>Endereço</h3>
+            <button
+              type="button"
+              id="btn-open-coords"
+              class="button-icon has-label"
+              title="Inserir Coordenadas"
+            >
+              <svg
+                viewBox="0 0 24 24"
+                width="18"
+                height="18"
+                fill="currentColor"
+              >
+                <path
+                  d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"
+                />
+              </svg>
+              <span>Coordenadas</span>
+            </button>
+          </header>
+          <div class="grid">
+            <div class="field col-9">
+              <label for="logradouro">Logradouro</label>
+              <input
+                type="text"
+                id="logradouro"
+                name="logradouro"
+                required
+                placeholder="Endereço onde ocorreu a ocorrência"
+              />
+              <small id="logradouroError"
+                >Por favor, insira um endereço válido</small
+              >
+            </div>
+            <div class="field col-3">
+              <label for="numero">Nº</label>
+              <input
+                type="text"
+                id="numero"
+                name="numero"
+                pattern="^\d+$"
+                required
+                placeholder="Número do endereço"
+              />
+              <small id="numeroError"
+                >Por favor, insira um número de endereço válido</small
+              >
+            </div>
+            <div class="field col-12">
+              <label for="bairro">Bairro</label>
+              <input
+                type="text"
+                id="bairro"
+                name="bairro"
+                required
+                placeholder="Bairro da ocorrência"
+              />
+              <small id="bairroError">Por favor, insira um bairro válido</small>
+            </div>
+          </div>
+        </section>
+      </div>
 
-      <h3>Descrição</h3>
-      <section class="form-section">
-        <p class="disclaimer">
+      <section class="card" id="sec-descricao">
+        <header class="card-head"><h3>Descrição</h3></header>
+
+        <p class="note">
           Recomendado preencher o campo abaixo com o CAPSLOCK desligado...
         </p>
-        <label for="inicioFato">Corpo da Ocorrência:</label>
-        <textarea
-          id="inicioFato"
-          class="full-width"
-          rows="10"
-          placeholder="Descreva o início do fato..."
-        ></textarea>
-      </section>
 
-      <h3>Detalhamento</h3>
-      <section class="form-section">
-        <label for="motivo">Motivo:</label>
-        <input type="text" id="motivo" name="motivo" placeholder="Não Cabe" />
-
-        <label for="respObra">Responsável pela Obra:</label>
-        <input
-          type="text"
-          id="respObra"
-          name="respObra"
-          placeholder="Não Cabe"
-        />
-
-        <label for="desviosbc">Desvios B/C:</label>
-        <input
-          type="text"
-          id="desviosbc"
-          name="desviosbc"
-          placeholder="Não Houve"
-        />
-
-        <label for="desvioscb">Desvios C/B:</label>
-        <input
-          type="text"
-          id="desvioscb"
-          name="desvioscb"
-          placeholder="Não Houve"
-        />
-
-        <label for="linhasAfetadas">Linhas Afetadas:</label>
-        <input
-          type="text"
-          id="linhasAfetadas"
-          name="linhasAfetadas"
-          placeholder="Não Houve"
-        />
-
-        <label for="alerta">Alerta:</label>
-        <input type="text" id="alerta" name="alerta" placeholder="Não Houve" />
-
-        <label for="linha">Linha:</label>
-        <input type="text" id="linha" name="linha" placeholder="Não Houve" />
-
-        <label for="ocSptrans">OC. SPTRANS:</label>
-        <input
-          type="text"
-          id="ocSptrans"
-          name="ocSptrans"
-          placeholder="Não Houve"
-        />
-
-        <label for="contato">Contato (Nome do contato da SPTrans):</label>
-        <input
-          type="text"
-          id="contato"
-          name="contato"
-          placeholder="Não Houve"
-        />
-
-        <label for="cco">CCO (Responsável pela ocorrência):</label>
-        <input type="text" id="cco" name="cco" placeholder="Yvan" />
-
-        <label for="operacional">Operacional (Nome do operacional):</label>
-        <input
-          type="text"
-          id="operacional"
-          name="operacional"
-          placeholder="Não Houve"
-        />
-      </section>
-
-      <section class="form-section">
-        <h3>Anexar Imagens / Prints</h3>
-        <div
-          id="paste-area"
-          tabindex="0"
-          style="
-            border: 2px dashed #ccc;
-            padding: 20px;
-            text-align: center;
-            cursor: pointer;
-            transition: background 0.2s;
-          "
-        >
-          <p style="margin: 0; pointer-events: none; color: #666">
-            <strong>Clique aqui</strong> ou arraste imagens para colar<br />
-          </p>
+        <div class="field">
+          <label for="inicioFato">Corpo da Ocorrência</label>
+          <textarea
+            id="inicioFato"
+            class="full-width"
+            rows="10"
+            placeholder="Descreva o início do fato..."
+          ></textarea>
         </div>
-        <p style="margin-top: 10px; font-size: 14px; color: #666">
+      </section>
+
+      <section class="card" id="sec-detalhamento">
+        <header class="card-head"><h3>Detalhamento</h3></header>
+        <div class="grid">
+          <div class="field col-4">
+            <label for="motivo">Motivo</label>
+            <input
+              type="text"
+              id="motivo"
+              name="motivo"
+              placeholder="Não Cabe"
+            />
+          </div>
+          <div class="field col-4">
+            <label for="respObra">Responsável pela Obra</label>
+            <input
+              type="text"
+              id="respObra"
+              name="respObra"
+              placeholder="Não Cabe"
+            />
+          </div>
+          <div class="field col-4">
+            <label for="linhasAfetadas">Linhas Afetadas</label>
+            <input
+              type="text"
+              id="linhasAfetadas"
+              name="linhasAfetadas"
+              placeholder="Não Houve"
+            />
+          </div>
+          <div class="field col-6">
+            <label for="desviosbc">Desvios B/C</label>
+            <textarea
+              id="desviosbc"
+              name="desviosbc"
+              class="full-width"
+              rows="7"
+              placeholder="NÃO HOUVE"
+            ></textarea>
+          </div>
+          <div class="field col-6">
+            <label for="desvioscb">Desvios C/B</label>
+            <textarea
+              id="desvioscb"
+              name="desvioscb"
+              class="full-width"
+              rows="7"
+              placeholder="NÃO HOUVE"
+            ></textarea>
+          </div>
+        </div>
+      </section>
+
+      <div class="card-row" style="--row-a: 8fr; --row-b: 4fr">
+        <section class="card" id="sec-sptrans">
+          <header class="card-head"><h3>SPTrans</h3></header>
+          <div class="grid">
+            <div class="field col-3">
+              <label for="alerta"
+                >Alerta <span class="hint">66*** - HH:MM</span></label
+              >
+              <input
+                type="text"
+                id="alerta"
+                name="alerta"
+                placeholder="Não Houve"
+              />
+            </div>
+            <div class="field col-3">
+              <label for="linha"
+                >Linha <span class="hint">linha do alerta</span></label
+              >
+              <input
+                type="text"
+                id="linha"
+                name="linha"
+                placeholder="Não Houve"
+              />
+            </div>
+            <div class="field col-3">
+              <label for="ocSptrans">OC. SPTRANS</label>
+              <input
+                type="text"
+                id="ocSptrans"
+                name="ocSptrans"
+                placeholder="Não Houve"
+              />
+            </div>
+            <div class="field col-3">
+              <label for="contato"
+                >Contato <span class="hint">nome na SPTrans</span></label
+              >
+              <input
+                type="text"
+                id="contato"
+                name="contato"
+                placeholder="Não Houve"
+              />
+            </div>
+          </div>
+        </section>
+
+        <section class="card" id="sec-interno">
+          <header class="card-head"><h3>Interno</h3></header>
+          <div class="grid">
+            <div class="field col-6">
+              <label for="cco">CCO <span class="hint">responsável</span></label>
+              <input type="text" id="cco" name="cco" placeholder="Yvan" />
+            </div>
+            <div class="field col-6">
+              <label for="operacional"
+                >Operacional <span class="hint">nome</span></label
+              >
+              <input
+                type="text"
+                id="operacional"
+                name="operacional"
+                placeholder="Não Houve"
+              />
+            </div>
+          </div>
+        </section>
+      </div>
+
+      <section class="card" id="sec-imagens">
+        <header class="card-head"><h3>Anexar imagens / prints</h3></header>
+        <div id="paste-area" class="paste-area" tabindex="0">
+          <p><strong>Clique aqui</strong> ou arraste imagens para colar</p>
+        </div>
+        <p class="muted-note">
           <strong>Obs:</strong> Especificamente arquivos que estão salvos no
           computador precisam ser arrastados pra área de transferência.
         </p>
       </section>
 
-      <section class="form-section hidden" id="excel">
-        <h3>Occurrence Control Line</h3>
+      <section class="card hidden" id="excel">
+        <header class="card-head">
+          <h3>Linha do controle de ocorrências</h3>
+        </header>
         <div class="table-container">
           <table>
             <thead>
@@ -287,27 +382,31 @@
             </tbody>
           </table>
         </div>
-        <button class="button" id="copy">
-          <span class="shadow"></span><span class="edge"></span>
-          <div class="front"><span>COPIAR LINHA</span></div>
-        </button>
+        <div class="buttons-row">
+          <button class="button" id="copy">
+            <span class="shadow"></span><span class="edge"></span>
+            <div class="front"><span>COPIAR LINHA</span></div>
+          </button>
+        </div>
       </section>
 
-      <button class="button" id="generateWord">
-        <span class="shadow"></span><span class="edge"></span>
-        <div class="front"><span>GERAR RELATÓRIO</span></div>
-      </button>
-
-      <button class="button" id="clear">
-        <span class="shadow"></span><span class="edge"></span>
-        <div class="front"><span>LIMPAR</span></div>
-      </button>
-
-      <button class="button" id="notes">
-        <span class="shadow"></span><span class="edge"></span>
-        <div class="front"><span>ANOTAÇÕES</span></div>
-      </button>
-    </div>
+      <div class="action-bar">
+        <div class="action-bar-inner">
+          <button class="button button-muted" id="clear">
+            <span class="shadow"></span><span class="edge"></span>
+            <div class="front"><span>LIMPAR</span></div>
+          </button>
+          <button class="button" id="notes">
+            <span class="shadow"></span><span class="edge"></span>
+            <div class="front"><span>ANOTAÇÕES</span></div>
+          </button>
+          <button class="button" id="generateWord">
+            <span class="shadow"></span><span class="edge"></span>
+            <div class="front"><span>GERAR RELATÓRIO</span></div>
+          </button>
+        </div>
+      </div>
+    </main>
 
     <div id="modal" class="modal">
       <div class="modal-content">
@@ -332,7 +431,7 @@
     <div id="modal-format" class="modal">
       <div class="modal-content" style="max-width: 400px; text-align: center">
         <h3 style="margin-top: 0; border: none">Gerar Relatório</h3>
-        <p style="margin-bottom: 30px; color: #666">
+        <p style="margin-bottom: 30px; color: var(--muted)">
           Como deseja salvar este documento?
         </p>
         <div style="display: flex; flex-direction: column; gap: 15px">
@@ -365,7 +464,7 @@
     <div id="modal-coords" class="modal">
       <div class="modal-content" style="max-width: 500px">
         <h3>Insira Coordenadas</h3>
-        <p style="color: #666; margin-bottom: 15px">
+        <p style="color: var(--muted); margin-bottom: 15px">
           Cole as informações de GPS abaixo. O sistema identificará a Latitude e
           Longitude automaticamente.
         </p>
@@ -401,7 +500,7 @@
         <h3 id="sys-title" style="margin-top: 0; margin-bottom: 15px">Aviso</h3>
         <p
           id="sys-msg"
-          style="color: #666; margin-bottom: 25px; font-size: 16px"
+          style="color: var(--muted); margin-bottom: 25px; font-size: 16px"
         >
           ...
         </p>
@@ -427,8 +526,8 @@
         <div
           style="
             padding: 20px 30px;
-            background: #fff;
-            border-bottom: 1px solid #eee;
+            background: var(--surface);
+            border-bottom: 1px solid var(--border);
           "
         >
           <h3 style="margin-top: 0; margin-bottom: 5px; border: none">
@@ -453,7 +552,7 @@
         </div>
         <div
           class="map-container"
-          style="flex: 1; background: #eee; position: relative"
+          style="flex: 1; background: var(--bg); position: relative"
         >
           <iframe
             id="google-map-frame"
@@ -469,8 +568,8 @@
           class="modal-buttons"
           style="
             padding: 20px 30px;
-            background: #fff;
-            border-top: 1px solid #eee;
+            background: var(--surface);
+            border-top: 1px solid var(--border);
             display: flex;
             gap: 20px;
             justify-content: flex-end;
@@ -489,34 +588,6 @@
         </div>
       </div>
     </div>
-
-    <a class="back-home-btn" href="../../" aria-label="Back to home">
-      <svg viewBox="0 0 24 24" width="28" height="28" aria-hidden="true">
-        <path
-          fill="currentColor"
-          d="M12 2l2.6 2.7L17 2l2 5.6V14l-3.8-1.6L12 20l-3.2-7.6L5 14V7.6L7 2l2.4 2.7L12 2z"
-        />
-        <path
-          fill="currentColor"
-          d="M8.4 9.8L6 12.4l3.3-.4L9 11c.3-.7-.1-1.5-.6-1.2zM15.6 9.8l.3 1.2 3.1.4-2.4-2.6c-.6-.3-1 .5-.6 1z"
-        />
-      </svg>
-    </a>
-
-    <aside class="opts-panel" aria-labelledby="opts-title">
-      <h3 id="opts-title">OPÇÕES</h3>
-      <label class="sr-only" for="opt-action">Escolha uma opção</label>
-      <select id="opt-action" class="opts-select">
-        <option value="">— selecione —</option>
-        <option value="clear-all">LIMPAR TUDO</option>
-        <option value="sim-instabilidade">INSTABILIDADE NO SISTEMA SIM</option>
-        <option value="festividade-popular">FESTIVIDADE POPULAR</option>
-        <option value="acidente-terceiros">ACIDENTE ENTRE TERCEIROS</option>
-        <option value="alagamento">ALAGAMENTO</option>
-        <option value="geral">GERAL</option>
-      </select>
-      <button id="opt-apply" type="button" class="opts-apply">APLICAR</button>
-    </aside>
 
     <script src="https://unpkg.com/pizzip@3.1.4/dist/pizzip.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/docxtemplater/3.17.1/docxtemplater.js"></script>
