@@ -395,6 +395,30 @@
     return res.arrayBuffer();
   }
 
+  function reportMissing(items) {
+    items.forEach(({ id }) => {
+      const el = byId(id);
+      if (!el) return;
+      el.classList.add("invalid");
+      el.classList.remove("valid");
+      el.addEventListener("input", () => el.classList.remove("invalid"), {
+        once: true,
+      });
+    });
+
+    const list = items.map((item) => `• <strong>${item.label}</strong>`);
+    ui.alert(
+      "Campos Obrigatórios",
+      `Preencha os campos abaixo:\n\n${list.join("\n")}`,
+    );
+
+    const first = byId(items[0].id);
+    if (first) {
+      first.scrollIntoView({ behavior: "smooth", block: "center" });
+      first.focus({ preventScroll: true });
+    }
+  }
+
   async function handleGenerateWord() {
     try {
       const getVal = (id) => (byId(id)?.value || "").toUpperCase().trim();
@@ -421,44 +445,26 @@
         operacional: getVal("operacional") || "NÃO HOUVE",
       };
 
-      const check = (val, msg) => {
-        if (!val) {
-          ui.alert("Campo Obrigatório", msg);
-          return false;
-        }
-        return true;
+      const dateFmt = formatPtBrDate(inputs.dateRaw);
+      const missing = [];
+      const requireField = (id, label, value) => {
+        if (!nonEmpty(value)) missing.push({ id, label });
       };
 
-      if (!check(inputs.nOc, "Insira um numero de ocorrência. Ex: 6C1234"))
+      requireField("nOc", "Número da OC", inputs.nOc);
+      requireField("ocorrencia", "Ocorrência", inputs.ocorrencia);
+      requireField("date", "Data", dateFmt);
+      requireField("inicio", "Início", inputs.inicio);
+      requireField("logradouro", "Logradouro", inputs.logradouro);
+      requireField("numero", "Número do endereço", inputs.numero);
+      requireField("bairro", "Bairro", inputs.bairro);
+      requireField("inicioFato", "Corpo da Ocorrência", inputs.inicioFato);
+      requireField("cco", "CCO", inputs.cco);
+
+      if (missing.length > 0) {
+        reportMissing(missing);
         return;
-      if (
-        !check(
-          inputs.ocorrencia,
-          "Insira um tipo de ocorrência. Ex: Instabilidade Sistema SIM...",
-        )
-      )
-        return;
-      const dateFmt = formatPtBrDate(inputs.dateRaw);
-      if (!check(dateFmt, "Insira uma data válida para a ocorrência")) return;
-      if (
-        !check(
-          inputs.inicio,
-          "Insira o horário no qual a interferência se iniciou",
-        )
-      )
-        return;
-      if (!check(inputs.logradouro, "Insira um endereço para o ocorrido"))
-        return;
-      if (!check(inputs.numero, "Insira um numero para o logradouro")) return;
-      if (!check(inputs.bairro, "Insira um bairro para o logradouro")) return;
-      if (!check(inputs.inicioFato, "Insira corpo da ocorrência")) return;
-      if (
-        !check(
-          inputs.cco,
-          "Insira o nome do responsável do CCO pela elaboração da ocorrência",
-        )
-      )
-        return;
+      }
 
       const year = getYearSuffix(inputs.dateRaw);
 

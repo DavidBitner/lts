@@ -60,6 +60,8 @@ REGRAS OBRIGATÓRIAS:
 
 19. Expressões no formato "<termo> X <termo>", como "Colisão X Auto", "Colisão X Coletivo", "Coletivo X Auto", "Coletivo X Coletivo" e "Coletivo X Pedestre", são terminologia padrão de ocorrência. Nelas, o "X" é intencional e faz parte da terminologia. NÃO expanda nem substitua o "X" (por "com", "e", "por" etc.), NÃO altere sua capitalização e, principalmente, NÃO troque nem uniformize as palavras antes e depois dele: "Colisão" e "Coletivo" são termos distintos e cada um deve ser mantido exatamente como o autor escreveu. Nunca transforme "Colisão X ..." em "Coletivo X ..." nem o contrário.
 
+20. Se o mesmo erro aparecer mais de uma vez no texto, liste uma alteração para cada ocorrência, na ordem em que aparecem. O campo "original" deve ser o trecho exato do texto. Quando a palavra isolada for curta ou ambígua (como "e", "a", "o", "à"), inclua a palavra vizinha no trecho para que ele identifique apenas aquele ponto do texto.
+
 FORMATO DE ENTRADA:
 
 O texto vem dividido em duas seções, marcadas exatamente por [INICIO_DO_FATO] e [DESFECHO].

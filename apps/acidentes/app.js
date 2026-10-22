@@ -456,6 +456,7 @@
 
   function collectPeople() {
     const result = {};
+    const errors = [];
     for (const kind of Object.keys(PEOPLE)) {
       const cfg = PEOPLE[kind];
       const filled = [];
@@ -470,16 +471,18 @@
 
       if (cfg.required) {
         if (filled.length === 0) {
-          return {
-            error: `Preencha o <strong>${cfg.title}</strong>.`,
-          };
+          errors.push({
+            label: cfg.title,
+            id: `person-${kind}-0-${cfg.fields[0][0]}`,
+          });
         }
         for (const { idx, values } of filled) {
           for (const [key, label] of cfg.fields) {
             if (!nonEmpty(values[key])) {
-              return {
-                error: `Preencha o campo <strong>${label}</strong> do <strong>${personLabel(kind, idx)}</strong>.`,
-              };
+              errors.push({
+                label: `${label} do ${personLabel(kind, idx)}`,
+                id: `person-${kind}-${idx}-${key}`,
+              });
             }
           }
         }
@@ -495,7 +498,31 @@
         [kind + "Num"]: rows.length > 1 ? ` ${i + 1}` : "",
       }));
     }
-    return result;
+    return { errors, data: result };
+  }
+
+  function reportMissing(items) {
+    items.forEach(({ id }) => {
+      const el = byId(id);
+      if (!el) return;
+      el.classList.add("invalid");
+      el.classList.remove("valid");
+      el.addEventListener("input", () => el.classList.remove("invalid"), {
+        once: true,
+      });
+    });
+
+    const list = items.map((item) => `• <strong>${item.label}</strong>`);
+    ui.alert(
+      "Campos Obrigatórios",
+      `Preencha os campos abaixo:\n\n${list.join("\n")}`,
+    );
+
+    const first = byId(items[0].id);
+    if (first) {
+      first.scrollIntoView({ behavior: "smooth", block: "center" });
+      first.focus({ preventScroll: true });
+    }
   }
 
   /* ========================================================================== */
@@ -676,42 +703,32 @@
       const extraData = {};
       extras.forEach((f) => (extraData[f] = getVal(f) || "NÃO HOUVE"));
 
-      const check = (val, msg) => {
-        if (!val) {
-          ui.alert("Campo Obrigatório", msg);
-          return false;
-        }
-        return true;
+      const collected = collectPeople();
+      const peopleData = collected.data;
+      const missing = [];
+      const requireField = (id, label, value) => {
+        if (!nonEmpty(value)) missing.push({ id, label });
       };
 
-      if (!check(inputs.nOc, "Preencha o <strong>Número da OC</strong>."))
-        return;
-      if (!check(inputs.ocorrencia, "Preencha a <strong>Ocorrência</strong>."))
-        return;
-      if (!check(inputs.coletivo, "Preencha o <strong>Coletivo</strong>."))
-        return;
-      if (!check(inputs.linha, "Preencha a <strong>Linha</strong>.")) return;
-      if (!check(inputs.dateRaw, "Selecione uma <strong>Data</strong>."))
-        return;
-      if (!check(inputs.time, "Preencha a <strong>Hora</strong>.")) return;
-      if (!check(inputs.logradouro, "Preencha o <strong>Endereço</strong>."))
-        return;
-      if (!check(inputs.numero, "Preencha o <strong>Número</strong>.")) return;
-      if (!check(inputs.bairro, "Preencha o <strong>Bairro</strong>.")) return;
-      const peopleData = collectPeople();
-      if (peopleData.error) {
-        ui.alert("Campo Obrigatório", peopleData.error);
+      requireField("nOc", "Número da OC", inputs.nOc);
+      requireField("ocorrencia", "Ocorrência", inputs.ocorrencia);
+      requireField("coletivo", "Coletivo", inputs.coletivo);
+      requireField("linha", "Linha", inputs.linha);
+      requireField("date", "Data", inputs.dateRaw);
+      requireField("time", "Hora", inputs.time);
+      requireField("logradouro", "Endereço", inputs.logradouro);
+      requireField("numero", "Número", inputs.numero);
+      requireField("bairro", "Bairro", inputs.bairro);
+      missing.push(...collected.errors);
+      requireField("inicioFato", "Início do Fato", inputs.inicioFato);
+      requireField("desfecho", "Desfecho", inputs.desfecho);
+      requireField("cco", "CCO", inputs.cco);
+      requireField("matricula", "Matrícula", inputs.matricula);
+
+      if (missing.length > 0) {
+        reportMissing(missing);
         return;
       }
-      if (
-        !check(inputs.inicioFato, "Preencha o <strong>Início do Fato</strong>.")
-      )
-        return;
-      if (!check(inputs.desfecho, "Preencha o <strong>Desfecho</strong>."))
-        return;
-      if (!check(inputs.cco, "Preencha o <strong>CCO</strong>.")) return;
-      if (!check(inputs.matricula, "Preencha a <strong>Matrícula</strong>."))
-        return;
 
       const dateFmt = formatPtBrDate(inputs.dateRaw);
       const year = getYearSuffix(inputs.dateRaw);
@@ -839,7 +856,11 @@
     desfecho: "Desfecho",
   };
 
+  const REVIEW_FIELDS = ["inicioFato", "desfecho"];
+
   let reviewChanges = [];
+  let reviewSpans = [];
+  let reviewTexts = {};
   let reviewCooldownInterval = null;
 
   const REVIEW_COOLDOWN_SECONDS = 60;
@@ -911,12 +932,11 @@
     }
 
     try {
+      const texts = { inicioFato: inicioFato.value, desfecho: desfecho.value };
       const response = await fetch("/api/check-text", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          fields: { inicioFato: inicioFato.value, desfecho: desfecho.value },
-        }),
+        body: JSON.stringify({ fields: texts }),
       });
 
       const result = await response.json();
@@ -925,12 +945,15 @@
         throw new Error(result.error || `Status ${response.status}`);
       }
 
-      if (!result.changes || result.changes.length === 0) {
+      const prepared = prepareReview(texts, result.changes || []);
+      if (prepared.changes.length === 0) {
         ui.alert("Revisão de Texto", "Nenhuma correção encontrada.");
         return;
       }
 
-      reviewChanges = result.changes.map((c) => ({ ...c, selected: true }));
+      reviewTexts = texts;
+      reviewChanges = prepared.changes.map((c) => ({ ...c, selected: true }));
+      reviewSpans = prepared.spans;
       openReviewModal();
     } catch (e) {
       ui.alert("Erro na Revisão", e.message);
@@ -947,28 +970,115 @@
       .replace(/"/g, "&quot;");
   }
 
-  function buildMarkedHtml(text, changes, mode) {
-    const positioned = changes
-      .map((c) => ({ ...c, idx: text.indexOf(c.original) }))
-      .filter((c) => c.idx !== -1)
-      .sort((a, b) => a.idx - b.idx);
+  const WORD_CHAR = /[\p{L}\p{N}_]/u;
 
+  function findOccurrences(text, needle) {
+    const positions = [];
+    const startsWithWord = WORD_CHAR.test(needle[0]);
+    const endsWithWord = WORD_CHAR.test(needle[needle.length - 1]);
+    let from = 0;
+    while (true) {
+      const idx = text.indexOf(needle, from);
+      if (idx === -1) break;
+      const end = idx + needle.length;
+      const boundaryBefore =
+        !startsWithWord || idx === 0 || !WORD_CHAR.test(text[idx - 1]);
+      const boundaryAfter =
+        !endsWithWord || end === text.length || !WORD_CHAR.test(text[end]);
+      if (boundaryBefore && boundaryAfter) positions.push(idx);
+      from = idx + 1;
+    }
+    return positions;
+  }
+
+  function resolveReviewSpans(texts, changes) {
+    const spans = [];
+
+    REVIEW_FIELDS.forEach((field) => {
+      const text = texts[field] || "";
+      const groups = new Map();
+      changes.forEach((change, changeIdx) => {
+        if (change.field !== field) return;
+        if (!groups.has(change.original)) groups.set(change.original, []);
+        groups.get(change.original).push(changeIdx);
+      });
+
+      const fieldSpans = [];
+      groups.forEach((changeIdxs, original) => {
+        const positions = findOccurrences(text, original);
+        const repeatsEverywhere =
+          changeIdxs.length === 1 && original.trim().length > 2;
+        const covered = repeatsEverywhere
+          ? positions.length
+          : Math.min(changeIdxs.length, positions.length);
+        for (let n = 0; n < covered; n++) {
+          fieldSpans.push({
+            field,
+            start: positions[n],
+            end: positions[n] + original.length,
+            changeIdx: changeIdxs[Math.min(n, changeIdxs.length - 1)],
+          });
+        }
+      });
+
+      fieldSpans.sort((a, b) => a.start - b.start);
+      let lastEnd = 0;
+      fieldSpans.forEach((span) => {
+        if (span.start < lastEnd) return;
+        spans.push(span);
+        lastEnd = span.end;
+      });
+    });
+
+    return spans;
+  }
+
+  function prepareReview(texts, rawChanges) {
+    const valid = rawChanges.filter(
+      (c) =>
+        REVIEW_FIELDS.includes(c.field) &&
+        nonEmpty(c.original) &&
+        typeof c.replacement === "string" &&
+        c.original !== c.replacement,
+    );
+
+    const spans = resolveReviewSpans(texts, valid);
+    const remap = new Map();
+    const changes = [];
+    valid.forEach((change, oldIdx) => {
+      if (!spans.some((s) => s.changeIdx === oldIdx)) return;
+      remap.set(oldIdx, changes.length);
+      changes.push(change);
+    });
+
+    return {
+      changes,
+      spans: spans.map((s) => ({ ...s, changeIdx: remap.get(s.changeIdx) })),
+    };
+  }
+
+  function buildMarkedHtml(field, mode) {
+    const text = reviewTexts[field] || "";
     let html = "";
     let cursor = 0;
-    positioned.forEach((c) => {
-      if (c.idx < cursor) return;
-      html += escapeHtml(text.slice(cursor, c.idx));
-      if (mode === "original") {
-        html += `<mark class="mark-err" data-tooltip="${escapeHtml(c.type)}">${escapeHtml(c.original)}</mark>`;
-      } else if (c.selected) {
-        html += `<mark class="mark-fix" data-tooltip="${escapeHtml(c.type)}">${escapeHtml(c.replacement)}</mark>`;
-      } else {
-        html += escapeHtml(c.original);
-      }
-      cursor = c.idx + c.original.length;
-    });
-    html += escapeHtml(text.slice(cursor));
-    return html;
+
+    reviewSpans
+      .filter((s) => s.field === field)
+      .forEach((span) => {
+        const change = reviewChanges[span.changeIdx];
+        const original = text.slice(span.start, span.end);
+        html += escapeHtml(text.slice(cursor, span.start));
+        if (mode === "original") {
+          html += `<mark class="mark-err" data-tooltip="${escapeHtml(change.type)}">${escapeHtml(original)}</mark>`;
+        } else if (change.selected) {
+          html += `<mark class="mark-fix" data-tooltip="${escapeHtml(change.type)}">${escapeHtml(change.replacement)}</mark>`;
+        } else {
+          html += escapeHtml(original);
+        }
+        cursor = span.end;
+      });
+
+    return html + escapeHtml(text.slice(cursor));
   }
 
   function renderReviewPanels() {
@@ -976,19 +1086,11 @@
     const correctedBox = byId("review-corrected");
     if (!originalBox || !correctedBox) return;
 
-    const fieldsData = [
-      { id: "inicioFato", label: FIELD_LABELS.inicioFato },
-      { id: "desfecho", label: FIELD_LABELS.desfecho },
-    ];
-
     const renderMode = (mode) =>
-      fieldsData
-        .map(({ id, label }) => {
-          const text = byId(id)?.value || "";
-          const changes = reviewChanges.filter((c) => c.field === id);
-          return `<div class="review-block"><strong>${escapeHtml(label)}</strong><p>${buildMarkedHtml(text, changes, mode)}</p></div>`;
-        })
-        .join("");
+      REVIEW_FIELDS.map(
+        (id) =>
+          `<div class="review-block"><strong>${escapeHtml(FIELD_LABELS[id])}</strong><p>${buildMarkedHtml(id, mode)}</p></div>`,
+      ).join("");
 
     originalBox.innerHTML = renderMode("original");
     correctedBox.innerHTML = renderMode("corrected");
@@ -1000,12 +1102,13 @@
 
     list.innerHTML = "";
     reviewChanges.forEach((change, i) => {
+      const occurrences = reviewSpans.filter((s) => s.changeIdx === i).length;
       const item = document.createElement("label");
       item.className = "review-check-item";
       item.dataset.tooltip = `${FIELD_LABELS[change.field] || change.field} — ${change.type}`;
       item.innerHTML = `
         <input type="checkbox" data-idx="${i}" ${change.selected ? "checked" : ""} />
-        <span>${escapeHtml(change.original)}</span>
+        <span>${escapeHtml(change.original)}${occurrences > 1 ? ` (×${occurrences})` : ""}</span>
       `;
       item.querySelector("input").addEventListener("change", (e) => {
         reviewChanges[i].selected = e.target.checked;
@@ -1022,22 +1125,26 @@
   }
 
   function applyReviewChanges() {
-    const texts = {
-      inicioFato: byId("inicioFato")?.value,
-      desfecho: byId("desfecho")?.value,
-    };
+    REVIEW_FIELDS.forEach((field) => {
+      const original = reviewTexts[field] || "";
+      let text = original;
 
-    reviewChanges.forEach((change) => {
-      if (change.selected && texts[change.field] != null) {
-        texts[change.field] = texts[change.field].replace(
-          change.original,
-          change.replacement,
-        );
+      reviewSpans
+        .filter((s) => s.field === field && reviewChanges[s.changeIdx].selected)
+        .sort((a, b) => b.start - a.start)
+        .forEach((span) => {
+          text =
+            text.slice(0, span.start) +
+            reviewChanges[span.changeIdx].replacement +
+            text.slice(span.end);
+        });
+
+      const el = byId(field);
+      if (el && text !== original) {
+        el.value = text;
+        el.dispatchEvent(new Event("input"));
       }
     });
-
-    if (byId("inicioFato")) byId("inicioFato").value = texts.inicioFato;
-    if (byId("desfecho")) byId("desfecho").value = texts.desfecho;
 
     byId("modal-review")?.classList.remove("show");
   }

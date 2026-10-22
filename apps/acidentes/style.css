@@ -112,7 +112,8 @@ textarea::placeholder {
   color: #888;
 }
 
-input.invalid {
+input.invalid,
+textarea.invalid {
   border-color: red;
 }
 input.valid {

@@ -1,15 +1,15 @@
 <!doctype html>
-<html lang="en">
+<html lang="pt-BR">
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>LTS</title>
 
     <!-- Tab icon -->
-    <link rel="icon" href="./background.jpg" type="image/png" />
+    <link rel="icon" href="./favicon.png" type="image/png" />
 
     <!-- Preload background for faster paint -->
-    <link rel="preload" as="image" href="./background.jpg" />
+    <link rel="preload" as="image" href="./background.webp" type="image/webp" />
 
     <style>
       /* reset to avoid stray scrollbars from UA defaults */
@@ -42,7 +42,7 @@
         /* exact viewport width */
         overflow: hidden;
         /* prevent any scroll */
-        padding: 0;
+        padding: 1rem;
         display: grid;
         place-items: center;
         position: relative;
@@ -112,7 +112,11 @@
       .card {
         position: relative;
         display: grid;
-        place-items: center;
+        place-items: start center;
+        align-content: start;
+        gap: 0.5rem;
+        padding: 38px 1.25rem 0;
+        text-align: center;
         text-decoration: none;
         color: var(--text);
         background: linear-gradient(
@@ -163,6 +167,14 @@
         transition:
           transform var(--t-hover) var(--ease-out),
           opacity var(--t-hover) var(--ease-out);
+      }
+
+      .card p {
+        margin: 0;
+        max-width: 28ch;
+        font-size: 14px;
+        line-height: 1.35;
+        color: rgba(242, 242, 242, 0.62);
       }
 
       .card:hover,
@@ -229,15 +241,18 @@
   </head>
 
   <body class="hub">
-    <main class="grid" aria-label="Projects">
+    <main class="grid" aria-label="Ferramentas">
       <a class="card" href="./apps/acidentes/">
         <h2>Acidentes</h2>
+        <p>Relatório de acidente em Word, com vítimas, testemunhas e fotos.</p>
       </a>
       <a class="card" href="./apps/ocorrencias/">
         <h2>Interferências</h2>
+        <p>Relatório de obras, alagamentos, eventos e falhas de sistema.</p>
       </a>
       <a class="card" href="./apps/alertas/">
         <h2>Alertas</h2>
+        <p>Editor de alertas, com o texto formatado pronto para copiar.</p>
       </a>
     </main>
 
