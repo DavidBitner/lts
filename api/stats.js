@@ -21,11 +21,11 @@ const fmt = (iso) =>
 module.exports = async (req, res) => {
   const url = process.env.KV_REST_API_URL;
   const token = process.env.KV_REST_API_TOKEN;
-  const statsKey = process.env.STATS_KEY;
+  const statsKey = (process.env.STATS_KEY || "").trim();
   if (!url || !token || !statsKey) return res.status(500).send("Não configurado.");
 
-  const key = String((req.query && req.query.key) || "");
-  if (key !== statsKey) return res.status(401).send("Não autorizado.");
+  const key = String((req.query && req.query.key) || "").trim();
+  if (!statsKey || key !== statsKey) return res.status(401).send("Não autorizado.");
 
   const response = await fetch(`${url}/pipeline`, {
     method: "POST",
