@@ -1,148 +1,310 @@
+/* ========================================================================== */
+/* Variáveis & Reset                                                          */
+/* ========================================================================== */
+:root {
+  --bg: #0f0f11;
+  --surface: #1e1f23;
+  --surface-2: #2a2b30;
+  --border: #3b3d44;
+  --text: #ececec;
+  --muted: #9a9ca1;
+  --accent: #fbb91a;
+  --accent-light: #f0c86c;
+  --on-accent: #000;
+}
+
+*,
+*::before,
+*::after {
+  font-family: Calibri, sans-serif;
+}
+
 body {
+  background-color: var(--bg);
+  color: var(--text);
   margin: 0;
-  height: 100vh;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  font-family: sans-serif;
-  background-color: black;
+  padding: 0;
 }
 
-.container {
-  background: #575757;
-  padding: 2rem;
-  border-radius: 8px;
-  box-shadow: 0 0 20px white;
-  width: 600px;
-  max-width: 90%;
-  text-align: center;
-}
-
-.title {
-  font-size: 50px;
-  color: #FBB91A;
-}
-
-/* Separate toolbar and editor styling */
-.ql-toolbar {
-  background-color: white;
-  border-top-left-radius: 4px;
-  border-top-right-radius: 4px;
-  box-shadow: 0 0 20px white;
-}
-
-.ql-container {
-  background-color: white;
-  border-bottom-left-radius: 4px;
-  border-bottom-right-radius: 4px;
-  box-shadow: 0 0 20px white;
-}
-
-#editor {
-  height: 200px;
-  margin-bottom: 1rem;
-}
-
-/* CSS */
-.button-19 {
-  appearance: button;
-  background-color: #eccf8c;
-  border: solid transparent;
-  border-radius: 16px;
-  border-width: 0 0 4px;
-  box-sizing: border-box;
-  color: #FFFFFF;
-  cursor: pointer;
-  display: inline-block;
-  font-family: din-round, sans-serif;
-  font-size: 15px;
-  font-weight: 700;
-  letter-spacing: .8px;
-  line-height: 20px;
-  margin: 0;
-  outline: none;
-  overflow: visible;
-  padding: 13px 16px;
-  text-align: center;
-  text-transform: uppercase;
-  touch-action: manipulation;
-  transform: translateZ(0);
-  transition: filter .2s;
-  user-select: none;
-  -webkit-user-select: none;
-  vertical-align: middle;
-  white-space: nowrap;
-  width: 100%;
-}
-
-.button-19:after {
-  background-clip: padding-box;
-  background-color: #FBB91A;
-  border: solid transparent;
-  border-radius: 16px;
-  border-width: 0 0 4px;
-  bottom: -4px;
-  content: "";
-  left: 0;
-  position: absolute;
-  right: 0;
+/* ========================================================================== */
+/* Layout                                                                     */
+/* ========================================================================== */
+.topbar {
+  position: sticky;
   top: 0;
-  z-index: -1;
+  z-index: 9000;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 10px 24px;
+  background: rgba(11, 11, 12, 0.94);
+  backdrop-filter: blur(8px);
+  border-bottom: 1px solid var(--border);
 }
 
-.button-19,
-.button-19:focus {
-  user-select: auto;
+.topbar-title {
+  flex: 1;
+  margin: 0;
+  font-size: 20px;
+  color: var(--accent);
+  white-space: nowrap;
 }
 
-.button-19:hover:not(:disabled) {
-  filter: brightness(1.1);
-  -webkit-filter: brightness(1.1);
+.form-container {
+  max-width: 760px;
+  margin: 0 auto;
+  padding: 24px 24px 0;
+  color-scheme: dark;
 }
 
-.button-19:disabled {
-  cursor: auto;
+.card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 18px 24px 24px;
+  margin-bottom: 20px;
+  box-shadow:
+    0 12px 32px rgba(0, 0, 0, 0.8),
+    0 3px 8px rgba(0, 0, 0, 0.6),
+    inset 0 1px 0 rgba(255, 255, 255, 0.06);
 }
 
-.button-19:active {
-  border-width: 4px 0 0;
-  background: none;
+.card-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 16px;
 }
 
+.card-head h3 {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin: 0;
+  font-size: 17px;
+  letter-spacing: 0.6px;
+  text-transform: uppercase;
+  color: var(--accent);
+}
+
+.card-head h3::before {
+  content: "";
+  width: 4px;
+  height: 18px;
+  border-radius: 2px;
+  background: var(--accent);
+}
+
+.action-bar {
+  position: sticky;
+  bottom: 0;
+  z-index: 8000;
+  margin: 0 -24px;
+  padding: 26px 24px 18px;
+  background: linear-gradient(to top, var(--bg) 65%, transparent);
+}
+
+.action-bar-inner {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 18px;
+}
+
+/* ========================================================================== */
+/* Botões (Estilo 3D)                                                         */
+/* ========================================================================== */
+.button {
+  position: relative;
+  border: none;
+  background: transparent;
+  padding: 0;
+  outline: none;
+  cursor: pointer;
+}
+
+.button .shadow {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: var(--accent);
+  border-radius: 8px;
+  transform: translateY(2px);
+  transition: transform 600ms cubic-bezier(0.3, 0.7, 0.4, 1);
+}
+
+.button .edge {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  border-radius: 8px;
+  background: linear-gradient(
+    to left,
+    var(--accent) 0%,
+    var(--accent-light) 8%,
+    var(--accent-light) 92%,
+    var(--accent) 100%
+  );
+}
+
+.button .front {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 12px 28px;
+  font-size: 1.25rem;
+  color: var(--on-accent);
+  background: var(--accent);
+  border-radius: 8px;
+  transform: translateY(-4px);
+  transition: transform 600ms cubic-bezier(0.3, 0.7, 0.4, 1);
+}
+
+.button:hover .shadow {
+  transform: translateY(4px);
+  transition: transform 250ms cubic-bezier(0.3, 0.7, 0.4, 1.5);
+}
+.button:hover .front {
+  transform: translateY(-6px);
+  transition: transform 250ms cubic-bezier(0.3, 0.7, 0.4, 1.5);
+}
+.button:active .shadow {
+  transform: translateY(1px);
+  transition: transform 34ms;
+}
+.button:active .front {
+  transform: translateY(-2px);
+  transition: transform 34ms;
+}
+.button .front span {
+  user-select: none;
+}
+
+/* ========================================================================== */
+/* Botão Voltar                                                               */
+/* ========================================================================== */
 .back-home-btn {
-  position: fixed;
-  right: 20px;
-  bottom: 20px;
-  width: 56px;
-  height: 56px;
+  flex-shrink: 0;
+  width: 40px;
+  height: 40px;
   display: grid;
   place-items: center;
   border-radius: 50%;
-  background: #FBB91A;
+  background: var(--accent);
   color: #000;
   text-decoration: none;
-  box-shadow: 0 8px 24px rgba(0, 0, 0, .35), inset 0 0 0 1px rgba(255, 255, 255, .06);
-  transform: scale(1);
-  transition: transform 220ms cubic-bezier(.2, .7, .1, 1), background-color 180ms ease, color 180ms ease, box-shadow 220ms ease;
-  z-index: 9999
+  transition:
+    transform 220ms ease,
+    background-color 180ms ease;
 }
-
 .back-home-btn:hover,
 .back-home-btn:focus-visible {
   transform: scale(1.1);
   background: #000;
-  color: #FBB91A;
-  box-shadow: 0 10px 32px rgba(0, 0, 0, .5), inset 0 0 0 1px rgba(255, 255, 255, .08);
-  outline: 0
+  color: var(--accent);
+  outline: 0;
 }
-
-.back-home-btn:active {
-  transform: scale(.9);
-  transition-duration: 100ms
-}
-
 .back-home-btn svg {
-  display: block;
-  width: 28px;
-  height: 28px
+  width: 24px;
+  height: 24px;
+}
+
+/* ========================================================================== */
+/* Editor (Quill)                                                             */
+/* ========================================================================== */
+#editor {
+  height: 320px;
+}
+
+.ql-toolbar.ql-snow {
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  border-radius: 6px 6px 0 0;
+}
+
+.ql-container.ql-snow {
+  background: #fff;
+  color: #1a1a1a;
+  border: 1px solid var(--border);
+  border-top: 0;
+  border-radius: 0 0 6px 6px;
+  font-size: 16px;
+}
+
+.ql-snow .ql-stroke {
+  stroke: var(--text);
+}
+
+.ql-snow .ql-fill,
+.ql-snow .ql-stroke.ql-fill {
+  fill: var(--text);
+}
+
+.ql-snow .ql-picker {
+  color: var(--text);
+}
+
+.ql-snow.ql-toolbar button:hover,
+.ql-snow.ql-toolbar button.ql-active,
+.ql-snow.ql-toolbar .ql-picker-label:hover,
+.ql-snow.ql-toolbar .ql-picker-label.ql-active,
+.ql-snow.ql-toolbar .ql-picker-item:hover,
+.ql-snow.ql-toolbar .ql-picker-item.ql-selected {
+  color: var(--accent);
+}
+
+.ql-snow.ql-toolbar button:hover .ql-stroke,
+.ql-snow.ql-toolbar button.ql-active .ql-stroke,
+.ql-snow.ql-toolbar .ql-picker-label:hover .ql-stroke,
+.ql-snow.ql-toolbar .ql-picker-label.ql-active .ql-stroke,
+.ql-snow.ql-toolbar .ql-picker-item:hover .ql-stroke,
+.ql-snow.ql-toolbar .ql-picker-item.ql-selected .ql-stroke {
+  stroke: var(--accent);
+}
+
+.ql-snow.ql-toolbar button:hover .ql-fill,
+.ql-snow.ql-toolbar button.ql-active .ql-fill,
+.ql-snow.ql-toolbar .ql-picker-label:hover .ql-fill,
+.ql-snow.ql-toolbar .ql-picker-label.ql-active .ql-fill {
+  fill: var(--accent);
+}
+
+.ql-snow .ql-picker-options {
+  background: var(--surface-2);
+  border-color: var(--border);
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.6);
+}
+
+.ql-snow .ql-picker.ql-expanded .ql-picker-label {
+  border-color: var(--border);
+}
+
+.ql-snow .ql-color-picker .ql-picker-options,
+.ql-snow .ql-icon-picker .ql-picker-options {
+  background: var(--surface-2);
+}
+
+/* ========================================================================== */
+/* Responsivo                                                                 */
+/* ========================================================================== */
+@media (max-width: 600px) {
+  .form-container {
+    padding: 14px 14px 0;
+  }
+  .card {
+    padding: 14px 14px 14px;
+  }
+  .topbar {
+    padding: 10px 14px;
+  }
+  .action-bar {
+    margin: 0 -14px;
+    padding: 22px 14px 14px;
+  }
 }
