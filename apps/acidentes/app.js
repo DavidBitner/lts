@@ -11,7 +11,9 @@
   const APP_NS = "acidentes:";
   const YEAR_SUFFIX = "2026";
   const MAX_DOC_WIDTH = 680;
-  const MAX_DOC_HEIGHT = 800;
+  const MAX_DOC_HEIGHT = 780;
+  const PAIR_MAX_HEIGHT = 380;
+  const CAPTION_MAX_LENGTH = 120;
 
   let attachedImages = [];
   let imageDimensionsCache = {};
@@ -122,7 +124,7 @@
 
   function addImage(base64, width, height) {
     if (imageDimensionsCache[base64]) return;
-    attachedImages.push({ src: base64, w: width, h: height });
+    attachedImages.push({ src: base64, w: width, h: height, caption: "" });
     imageDimensionsCache[base64] = { w: width, h: height };
     renderGallery();
   }
@@ -139,41 +141,210 @@
     reader.readAsDataURL(blob);
   }
 
-  function renderGallery() {
-    const container = byId("paste-area");
-    if (!container) return;
-    const existingGallery = container.querySelector(".img-preview-container");
-    if (existingGallery) existingGallery.remove();
+  function isLandscape(item) {
+    return item.w >= item.h;
+  }
 
-    if (attachedImages.length > 0) {
-      const gallery = document.createElement("div");
-      gallery.className = "img-preview-container";
-      gallery.style.cssText =
-        "display: flex; flex-wrap: wrap; gap: 10px; margin-top: 15px; justify-content: center;";
-
-      attachedImages.forEach((item, index) => {
-        const wrap = document.createElement("div");
-        wrap.style.cssText = "position: relative; animation: fadeIn 0.3s ease;";
-        const img = document.createElement("img");
-        img.src = item.src;
-        img.style.cssText =
-          "height: 100px; border-radius: 4px; border: 1px solid #ccc; box-shadow: 0 2px 5px rgba(0,0,0,0.2); object-fit: cover;";
-        const btnRemove = document.createElement("button");
-        btnRemove.innerText = "X";
-        btnRemove.style.cssText =
-          "position: absolute; top: -8px; right: -8px; background: red; color: white; border: 2px solid white; border-radius: 50%; width: 24px; height: 24px; cursor: pointer; font-weight: bold; font-size: 12px; display: flex; align-items: center; justify-content: center; box-shadow: 0 2px 4px rgba(0,0,0,0.3);";
-        btnRemove.onclick = (e) => {
-          e.stopPropagation();
-          delete imageDimensionsCache[item.src];
-          attachedImages.splice(index, 1);
-          renderGallery();
-        };
-        wrap.appendChild(img);
-        wrap.appendChild(btnRemove);
-        gallery.appendChild(wrap);
-      });
-      container.appendChild(gallery);
+  function computeImageSizes() {
+    const sizes = new Map();
+    const fit = (item, maxH) => {
+      let w = Math.min(item.w, MAX_DOC_WIDTH);
+      let h = item.h * (w / item.w);
+      if (h > maxH) {
+        w *= maxH / h;
+        h = maxH;
+      }
+      return [Math.round(w), Math.round(h)];
+    };
+    const pairedWithNext = new Set();
+    for (let i = 0; i < attachedImages.length - 1; i++) {
+      if (
+        isLandscape(attachedImages[i]) &&
+        isLandscape(attachedImages[i + 1])
+      ) {
+        pairedWithNext.add(i);
+        i++;
+      }
     }
+    attachedImages.forEach((item, i) => {
+      const paired =
+        pairedWithNext.has(i) || (i > 0 && pairedWithNext.has(i - 1));
+      sizes.set(item.src, fit(item, paired ? PAIR_MAX_HEIGHT : MAX_DOC_HEIGHT));
+    });
+    return { sizes, pairedWithNext };
+  }
+
+  function moveImage(from, to) {
+    if (to < 0 || to >= attachedImages.length || from === to) return;
+    const [item] = attachedImages.splice(from, 1);
+    attachedImages.splice(to, 0, item);
+    renderGallery();
+  }
+
+  function getGalleryContainer() {
+    let gallery = byId("image-gallery");
+    if (!gallery) {
+      const area = byId("paste-area");
+      if (!area) return null;
+      gallery = document.createElement("div");
+      gallery.id = "image-gallery";
+      gallery.className = "image-gallery";
+      area.insertAdjacentElement("afterend", gallery);
+    }
+    return gallery;
+  }
+
+  function renderGallery() {
+    const container = getGalleryContainer();
+    if (!container) return;
+    container.innerHTML = "";
+    container.hidden = attachedImages.length === 0;
+    if (attachedImages.length === 0) return;
+
+    let dragIndex = null;
+
+    attachedImages.forEach((item, index) => {
+      const card = document.createElement("div");
+      card.className = "image-card";
+      card.draggable = true;
+
+      const thumb = document.createElement("div");
+      thumb.className = "image-card-thumb";
+      const img = document.createElement("img");
+      img.src = item.src;
+      img.alt = "";
+      img.draggable = false;
+      thumb.appendChild(img);
+
+      const caption = document.createElement("input");
+      caption.type = "text";
+      caption.className = "image-card-caption";
+      caption.placeholder = "Legenda (opcional)";
+      caption.maxLength = CAPTION_MAX_LENGTH;
+      caption.value = item.caption || "";
+      caption.addEventListener("input", () => {
+        item.caption = caption.value;
+      });
+      caption.addEventListener("blur", () => {
+        caption.value = caption.value.toUpperCase();
+        item.caption = caption.value;
+      });
+      caption.addEventListener("dragstart", (e) => e.stopPropagation());
+
+      const actions = document.createElement("div");
+      actions.className = "image-card-actions";
+      const mkBtn = (label, title, handler, disabled) => {
+        const b = document.createElement("button");
+        b.type = "button";
+        b.textContent = label;
+        b.title = title;
+        b.disabled = !!disabled;
+        b.addEventListener("click", (e) => {
+          e.stopPropagation();
+          handler();
+        });
+        return b;
+      };
+      actions.appendChild(
+        mkBtn(
+          "‹",
+          "Mover para trás",
+          () => moveImage(index, index - 1),
+          index === 0,
+        ),
+      );
+      actions.appendChild(
+        mkBtn(
+          "›",
+          "Mover para frente",
+          () => moveImage(index, index + 1),
+          index === attachedImages.length - 1,
+        ),
+      );
+      const hasCaptionField = Boolean(item.caption) || item.captionOpen;
+      actions.appendChild(
+        mkBtn(
+          hasCaptionField ? "Sem legenda" : "Legenda",
+          hasCaptionField ? "Remover legenda" : "Adicionar legenda",
+          () => {
+            if (hasCaptionField) {
+              item.caption = "";
+              item.captionOpen = false;
+            } else {
+              item.captionOpen = true;
+            }
+            renderGallery();
+            if (item.captionOpen) {
+              const field = container.querySelectorAll(".image-card-caption")[
+                index
+              ];
+              if (field) field.focus();
+            }
+          },
+        ),
+      );
+      const remove = document.createElement("button");
+      remove.type = "button";
+      remove.className = "image-card-remove";
+      remove.textContent = "✕";
+      remove.title = "Remover imagem";
+      remove.addEventListener("click", (e) => {
+        e.stopPropagation();
+        delete imageDimensionsCache[item.src];
+        attachedImages.splice(index, 1);
+        renderGallery();
+      });
+      thumb.appendChild(remove);
+
+      card.addEventListener("dragstart", (e) => {
+        dragIndex = index;
+        card.classList.add("dragging");
+        if (e.dataTransfer) {
+          e.dataTransfer.effectAllowed = "move";
+          e.dataTransfer.setData("text/plain", String(index));
+        }
+      });
+      const clearMarkers = () =>
+        container
+          .querySelectorAll(".drop-before, .drop-after")
+          .forEach((el) => el.classList.remove("drop-before", "drop-after"));
+      card.addEventListener("dragend", () => {
+        dragIndex = null;
+        card.classList.remove("dragging");
+        clearMarkers();
+      });
+      card.addEventListener("dragover", (e) => {
+        if (dragIndex === null) return;
+        e.preventDefault();
+        e.stopPropagation();
+        const rect = card.getBoundingClientRect();
+        const after = e.clientX > rect.left + rect.width / 2;
+        clearMarkers();
+        card.classList.add(after ? "drop-after" : "drop-before");
+        card.dataset.dropIndex = String(index + (after ? 1 : 0));
+      });
+      card.addEventListener("dragleave", (e) => {
+        if (!card.contains(e.relatedTarget)) {
+          card.classList.remove("drop-before", "drop-after");
+        }
+      });
+      card.addEventListener("drop", (e) => {
+        if (dragIndex === null) return;
+        e.preventDefault();
+        e.stopPropagation();
+        const from = dragIndex;
+        let target = Number(card.dataset.dropIndex ?? index);
+        dragIndex = null;
+        clearMarkers();
+        if (from < target) target--;
+        moveImage(from, target);
+      });
+
+      card.appendChild(thumb);
+      if (hasCaptionField) card.appendChild(caption);
+      card.appendChild(actions);
+      container.appendChild(card);
+    });
   }
 
   /* ========================================================================== */
@@ -575,7 +746,7 @@
         byId("linhaError"),
       ),
     time: (el) =>
-      setValidity(el, /^\d{2}:\d{2}$/.test(el.value), byId("timeError")),
+      setValidity(el, TIME_PATTERN.test(el.value), byId("timeError")),
     numero: (el) =>
       setValidity(el, /^(\d+|-)$/.test(el.value), byId("numeroError")),
     generic: (el, errId) => setValidity(el, nonEmpty(el.value), byId(errId)),
@@ -588,7 +759,74 @@
     if (errorEl) errorEl.style.display = isValid ? "none" : "inline";
   }
 
+  const TIME_PATTERN = /^([01]\d|2[0-3]):[0-5]\d$/;
+
+  function formatTimeInput(raw) {
+    const digits = raw.replace(/\D/g, "").slice(0, 4);
+    return digits.length > 2
+      ? `${digits.slice(0, 2)}:${digits.slice(2)}`
+      : digits;
+  }
+
+  function wireTimeInputs(ids) {
+    ids.forEach((id) => {
+      const el = byId(id);
+      if (!el) return;
+      el.addEventListener("input", () => {
+        el.value = formatTimeInput(el.value);
+      });
+      el.addEventListener("blur", () => {
+        if (!el.value) {
+          el.classList.remove("invalid", "valid");
+          return;
+        }
+        const ok = TIME_PATTERN.test(el.value);
+        el.classList.toggle("invalid", !ok);
+        el.classList.toggle("valid", ok);
+      });
+    });
+  }
+
+  function parseBrDate(text) {
+    const m = /^(\d{2})\/(\d{2})\/(\d{4})$/.exec((text || "").trim());
+    if (!m) return "";
+    const [, dd, mm, yyyy] = m;
+    const dt = new Date(Number(yyyy), Number(mm) - 1, Number(dd));
+    const valid =
+      dt.getFullYear() === Number(yyyy) &&
+      dt.getMonth() === Number(mm) - 1 &&
+      dt.getDate() === Number(dd);
+    return valid ? `${yyyy}-${mm}-${dd}` : "";
+  }
+
+  function getDateIso() {
+    return parseBrDate(byId("date")?.value);
+  }
+
+  function formatDateInput(raw) {
+    const digits = raw.replace(/\D/g, "").slice(0, 8);
+    if (digits.length > 4)
+      return `${digits.slice(0, 2)}/${digits.slice(2, 4)}/${digits.slice(4)}`;
+    if (digits.length > 2) return `${digits.slice(0, 2)}/${digits.slice(2)}`;
+    return digits;
+  }
+
+  function wireDateInput() {
+    const el = byId("date");
+    if (!el) return;
+    const iso = /^(\d{4})-(\d{2})-(\d{2})$/.exec(el.value);
+    if (iso) el.value = `${iso[3]}/${iso[2]}/${iso[1]}`;
+    el.addEventListener("input", () => {
+      el.value = formatDateInput(el.value);
+    });
+  }
+
   function wireValidators() {
+    const dateEl = byId("date");
+    if (dateEl)
+      dateEl.addEventListener("blur", () =>
+        setValidity(dateEl, !!parseBrDate(dateEl.value), byId("dateError")),
+      );
     const map = {
       nOc: "nOc",
       coletivo: "coletivo",
@@ -604,16 +842,14 @@
           validators[type](el);
         });
     });
-    ["ocorrencia", "date", "logradouro", "bairro", "cco", "matricula"].forEach(
-      (id) => {
-        const el = byId(id);
-        if (el)
-          el.addEventListener("blur", () => {
-            el.value = el.value.toUpperCase();
-            validators.generic(el, id + "Error");
-          });
-      },
-    );
+    ["ocorrencia", "logradouro", "bairro", "cco", "matricula"].forEach((id) => {
+      const el = byId(id);
+      if (el)
+        el.addEventListener("blur", () => {
+          el.value = el.value.toUpperCase();
+          validators.generic(el, id + "Error");
+        });
+    });
   }
 
   function refreshBoxes() {
@@ -671,7 +907,7 @@
         ocorrencia: getVal("ocorrencia"),
         coletivo: getVal("coletivo"),
         linha: getVal("linha"),
-        dateRaw: byId("date")?.value || "",
+        dateRaw: getDateIso(),
         time: getVal("time"),
         logradouro: getVal("logradouro"),
         numero: getVal("numero"),
@@ -715,7 +951,11 @@
       requireField("coletivo", "Coletivo", inputs.coletivo);
       requireField("linha", "Linha", inputs.linha);
       requireField("date", "Data", inputs.dateRaw);
-      requireField("time", "Hora", inputs.time);
+      requireField(
+        "time",
+        "Hora",
+        TIME_PATTERN.test(inputs.time) ? inputs.time : "",
+      );
       requireField("logradouro", "Endereço", inputs.logradouro);
       requireField("numero", "Número", inputs.numero);
       requireField("bairro", "Bairro", inputs.bairro);
@@ -733,25 +973,13 @@
       const dateFmt = formatPtBrDate(inputs.dateRaw);
       const year = getYearSuffix(inputs.dateRaw);
 
+      const imageSizes = computeImageSizes().sizes;
       const imageOpts = {
         centered: false,
         getImage: (tagValue) =>
           base64DataURLToArrayBuffer(tagValue) || new ArrayBuffer(0),
         getSize: function (img, tagValue) {
-          const dims = imageDimensionsCache[tagValue];
-          if (!dims) return [500, 300];
-          let { w, h } = dims;
-          if (w > MAX_DOC_WIDTH) {
-            const r = MAX_DOC_WIDTH / w;
-            w = MAX_DOC_WIDTH;
-            h = h * r;
-          }
-          if (h > MAX_DOC_HEIGHT) {
-            const r = MAX_DOC_HEIGHT / h;
-            h = MAX_DOC_HEIGHT;
-            w = w * r;
-          }
-          return [w, h];
+          return imageSizes.get(tagValue) || [500, 300];
         },
       };
 
@@ -766,7 +994,10 @@
         modules: imageModule ? [imageModule] : [],
       });
 
-      const fotosData = attachedImages.map((img) => ({ imagem: img.src }));
+      const fotosData = attachedImages.map((img) => {
+        const legenda = (img.caption || "").trim().toUpperCase();
+        return { imagem: img.src, legenda, temLegenda: legenda.length > 0 };
+      });
       const joinField = (kind, key) =>
         peopleData[kind].map((p) => p[kind + key]).join(" / ");
 
@@ -1417,7 +1648,7 @@
           refreshBoxes();
           setV(
             "inicioFato",
-            `INSPETOR OPERACIONAL __________ INFORMA, TRATA-SE DE UMA AVARIA ENCONTRADA NO COLETIVO ______, DENTRO DA GARAGEM UNIÃO, COLETIVO FOI ENCONTRADO PELO OPERACIONAL ÀS _________, NO ____________ COM A ______________ DANIFICADA.`,
+            `INSPETOR OPERACIONAL __________ INFORMA. TRATA-SE DE UMA AVARIA ENCONTRADA NO COLETIVO ______, DENTRO DA GARAGEM UNIÃO, COLETIVO FOI ENCONTRADO PELO OPERACIONAL ÀS _________, NO ____________ COM A ______________ DANIFICADA.`,
           );
           setV(
             "desfecho",
@@ -1426,7 +1657,7 @@
         } else if (val === "geral") {
           setV(
             "inicioFato",
-            `INSPETOR OPERACIONAL _____________ RELATA, TRATA-SE DE ______________, ENVOLVENDO O COLETIVO ______________, CONDUZIDO POR ______________________, PORTADOR DO CPF: ___________________, O MESMO RELATA _______________________________. \n\nNA ANÁLISE DAS CÂMERAS, __________________________________________.`,
+            `INSPETOR OPERACIONAL _____________ RELATA. TRATA-SE DE ______________, ENVOLVENDO O COLETIVO ______________, CONDUZIDO POR ______________________, PORTADOR DO CPF: ___________________, O MESMO RELATA _______________________________. \n\nNA ANÁLISE DAS CÂMERAS, __________________________________________.`,
           );
         }
       });
@@ -1452,7 +1683,7 @@
     function getFormattedSubject() {
       const getVal = (id) =>
         (document.getElementById(id)?.value || "").toUpperCase().trim();
-      const dateRaw = document.getElementById("date")?.value || "";
+      const dateRaw = getDateIso();
       const dateFmt = formatPtBrDate(dateRaw);
       const dateSubject = dateFmt
         ? dateFmt.replace(/\//g, ".").slice(0, 5)
@@ -1495,6 +1726,8 @@
     wirePeople();
     wireBoxes();
     wireValidators();
+    wireTimeInputs(["time"]);
+    wireDateInput();
     wireActions();
   }
 

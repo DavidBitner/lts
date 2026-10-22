@@ -47,15 +47,41 @@
 
       <section class="form-section">
         <label for="date">Data:</label>
-        <input type="date" id="date" name="date" required />
+        <input
+          type="text"
+          inputmode="numeric"
+          maxlength="10"
+          autocomplete="off"
+          id="date"
+          name="date"
+          required
+          placeholder="DD/MM/AAAA"
+        />
       </section>
 
       <section class="form-section">
         <label for="inicio">Início:</label>
-        <input type="time" id="inicio" name="inicio" required />
+        <input
+          type="text"
+          inputmode="numeric"
+          maxlength="5"
+          autocomplete="off"
+          id="inicio"
+          name="inicio"
+          placeholder="HH:MM"
+          required
+        />
 
         <label for="termino">Término:</label>
-        <input type="time" id="termino" name="termino" required />
+        <input
+          type="text"
+          inputmode="numeric"
+          maxlength="5"
+          autocomplete="off"
+          id="termino"
+          name="termino"
+          placeholder="HH:MM"
+        />
       </section>
 
       <section class="form-section">

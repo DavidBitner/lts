@@ -633,3 +633,122 @@ td {
   visibility: visible;
   transform: translateX(-50%) translateY(0);
 }
+
+/* Image gallery */
+.image-gallery {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  align-items: flex-start;
+  gap: 14px;
+  margin-top: 16px;
+}
+
+.image-gallery[hidden] {
+  display: none;
+}
+
+.image-card {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 6px;
+  min-width: 130px;
+  max-width: 190px;
+  cursor: grab;
+}
+
+.image-card.dragging {
+  opacity: 0.4;
+}
+
+.image-card.drop-before::before,
+.image-card.drop-after::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: 3px;
+  border-radius: 2px;
+  background: var(--primary-color);
+}
+
+.image-card.drop-before::before {
+  left: -9px;
+}
+
+.image-card.drop-after::after {
+  right: -9px;
+}
+
+.image-card-thumb {
+  position: relative;
+  align-self: center;
+}
+
+.image-card-thumb img {
+  display: block;
+  height: 100px;
+  max-width: 190px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+  object-fit: cover;
+}
+
+.image-card-remove {
+  position: absolute;
+  top: -8px;
+  right: -8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  padding: 0;
+  border: 2px solid #fff;
+  border-radius: 50%;
+  background: #e02424;
+  color: #fff;
+  font-size: 12px;
+  font-weight: 700;
+  cursor: pointer;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+}
+
+.image-card-caption {
+  width: 100%;
+  box-sizing: border-box;
+  padding: 5px 7px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  background: #fff;
+  color: #222;
+  font-size: 13px;
+}
+
+.image-card-actions {
+  display: flex;
+  justify-content: center;
+  gap: 4px;
+}
+
+.image-card-actions button {
+  padding: 2px 8px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  background: transparent;
+  color: #555;
+  font-size: 12px;
+  cursor: pointer;
+}
+
+.image-card-actions button:hover:not(:disabled) {
+  background: #eee;
+}
+
+.image-card-actions button:disabled {
+  opacity: 0.35;
+  cursor: default;
+}

@@ -79,13 +79,31 @@
 
       <section class="form-section">
         <label for="date">Data:</label>
-        <input type="date" id="date" name="date" required />
+        <input
+          type="text"
+          inputmode="numeric"
+          maxlength="10"
+          autocomplete="off"
+          id="date"
+          name="date"
+          required
+          placeholder="DD/MM/AAAA"
+        />
         <small id="dateError">Por favor, insira uma data válida</small>
       </section>
 
       <section class="form-section">
         <label for="time">Hora:</label>
-        <input type="time" id="time" name="time" required placeholder="HH:MM" />
+        <input
+          type="text"
+          inputmode="numeric"
+          maxlength="5"
+          autocomplete="off"
+          id="time"
+          name="time"
+          required
+          placeholder="HH:MM"
+        />
         <small id="timeError">Por favor, insira um horário válido</small>
       </section>
 
