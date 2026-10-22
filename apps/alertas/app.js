@@ -25,6 +25,17 @@
     }
   };
 
+  const trackEvent = (type) => {
+    try {
+      fetch("/api/track", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ app: "alertas", type }),
+        keepalive: true,
+      }).catch(() => {});
+    } catch (_) {}
+  };
+
   function init() {
     // Quill editor
     const quill = new Quill('#editor', {
@@ -61,6 +72,7 @@
       copyBtn.addEventListener('click', async () => {
         const html = quill.root.innerHTML;
         await navigator.clipboard.writeText(html);
+        trackEvent('copy');
         alert('HTML copiado');
       });
     }

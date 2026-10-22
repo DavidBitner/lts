@@ -26,6 +26,16 @@
   const $ = (sel, root = document) => root.querySelector(sel);
   const $$ = (sel, root = document) => Array.from(root.querySelectorAll(sel));
   const byId = (id) => document.getElementById(id);
+  const trackEvent = (type) => {
+    try {
+      fetch("/api/track", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ app: "ocorrencias", type }),
+        keepalive: true,
+      }).catch(() => {});
+    } catch (_) {}
+  };
   const setText = (id, text) => {
     const el = byId(id);
     if (el) el.textContent = text;
@@ -819,14 +829,17 @@
     if (genBtn) genBtn.addEventListener("click", handleGenerateWord);
 
     byId("btn-word-only")?.addEventListener("click", () => {
-      if (currentDocBlob)
+      if (currentDocBlob) {
         downloadBlob(currentDocBlob, currentFileName + ".docx");
+        trackEvent("word");
+      }
       byId("modal-format").classList.remove("show");
     });
 
     byId("btn-word-pdf")?.addEventListener("click", () => {
       if (currentDocBlob) {
         downloadBlob(currentDocBlob, currentFileName + ".docx");
+        trackEvent("word_pdf");
         generateAndDownloadPDF();
       }
     });
