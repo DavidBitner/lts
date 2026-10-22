@@ -143,35 +143,18 @@
       </section>
 
       <section class="form-section">
-        <div class="driver-entry">
-          <h5>Motorista</h5>
-          <label for="driverName">Nome:</label>
-          <input
-            type="text"
-            id="driverName"
-            name="driverName[]"
-            required
-            placeholder="NÃO HOUVE"
-          />
-
-          <label for="driverCpf">CPF:</label>
-          <input
-            type="text"
-            id="driverCpf"
-            name="driverCpf[]"
-            required
-            placeholder="NÃO HOUVE"
-          />
-
-          <label for="driverSituation">Situação:</label>
-          <input
-            type="text"
-            id="driverSituation"
-            name="driverSituation[]"
-            required
-            placeholder="NÃO HOUVE"
-          />
-        </div>
+        <div id="people-driver"></div>
+        <button
+          type="button"
+          class="button"
+          data-add="driver"
+          style="width: auto; margin-top: 15px"
+        >
+          <span class="shadow"></span><span class="edge"></span>
+          <div class="front" style="padding: 10px 20px; font-size: 1rem">
+            <span>+ MOTORISTA</span>
+          </div>
+        </button>
       </section>
 
       <h3>Descrição</h3>
@@ -180,8 +163,11 @@
           Recomendado preencher os próximos dois campos com o CAPSLOCK desligado
           para que o corretor funcione corretamente. <br />Ambos os campos serão
           automaticamente convertidos para CAPSLOCK quando o Word for gerado.
-          <br /><strong>O corretor ortográfico (Revisar Textos) é um recurso novo,
-          em fase de testes.</strong> Revise sempre as sugestões antes de aplicar.
+          <br /><strong
+            >O corretor ortográfico (Revisar Textos) é um recurso novo, em fase
+            de testes.</strong
+          >
+          Revise sempre as sugestões antes de aplicar.
         </p>
         <label for="inicioFato">Início do Fato:</label>
         <textarea
@@ -214,119 +200,48 @@
 
       <h3>Informações Específicas</h3>
       <section class="form-section">
-        <div class="victim-entry">
-          <h5>Vítima</h5>
-          <label for="victimName">Nome:</label>
-          <input
-            type="text"
-            id="victimName"
-            name="victimName[]"
-            required
-            placeholder="NÃO HOUVE"
-          />
-
-          <label for="victimDocumentation">Documentação:</label>
-          <input
-            type="text"
-            id="victimDocumentation"
-            name="victimDocumentation[]"
-            required
-            placeholder="NÃO HOUVE"
-          />
-
-          <label for="victimSituation">Situação:</label>
-          <input
-            type="text"
-            id="victimSituation"
-            name="victimSituation[]"
-            required
-            placeholder="NÃO HOUVE"
-          />
-
-          <label for="victimContact">Contato:</label>
-          <input
-            type="text"
-            id="victimContact"
-            name="victimContact[]"
-            required
-            placeholder="NÃO HOUVE"
-          />
-        </div>
-      </section>
-
-      <section class="form-section">
-        <div id="thirdParties">
-          <div class="third-party-entry">
-            <h5>Terceiro</h5>
-            <label for="thirdPartyName">Nome:</label>
-            <input
-              type="text"
-              id="thirdPartyName"
-              name="thirdPartyName[]"
-              required
-              placeholder="NÃO HOUVE"
-            />
-
-            <label for="thirdPartyDocumentation">Documentação:</label>
-            <input
-              type="text"
-              id="thirdPartyDocumentation"
-              name="thirdPartyDocumentation[]"
-              required
-              placeholder="NÃO HOUVE"
-            />
-
-            <label for="thirdPartyContact">Contato:</label>
-            <input
-              type="text"
-              id="thirdPartyContact"
-              name="thirdPartyContact[]"
-              required
-              placeholder="NÃO HOUVE"
-            />
+        <div id="people-victim"></div>
+        <button
+          type="button"
+          class="button"
+          data-add="victim"
+          style="width: auto; margin-top: 15px"
+        >
+          <span class="shadow"></span><span class="edge"></span>
+          <div class="front" style="padding: 10px 20px; font-size: 1rem">
+            <span>+ VÍTIMA</span>
           </div>
-        </div>
+        </button>
       </section>
 
       <section class="form-section">
-        <div class="witness-entry">
-          <h5>Testemunha</h5>
-          <label for="witnessName">Nome:</label>
-          <input
-            type="text"
-            id="witnessName"
-            name="witnessName[]"
-            required
-            placeholder="NÃO HOUVE"
-          />
+        <div id="people-thirdParty"></div>
+        <button
+          type="button"
+          class="button"
+          data-add="thirdParty"
+          style="width: auto; margin-top: 15px"
+        >
+          <span class="shadow"></span><span class="edge"></span>
+          <div class="front" style="padding: 10px 20px; font-size: 1rem">
+            <span>+ TERCEIRO</span>
+          </div>
+        </button>
+      </section>
 
-          <label for="witnessDocumentation">Documentação:</label>
-          <input
-            type="text"
-            id="witnessDocumentation"
-            name="witnessDocumentation[]"
-            required
-            placeholder="NÃO HOUVE"
-          />
-
-          <label for="witnessContact">Contato:</label>
-          <input
-            type="text"
-            id="witnessContact"
-            name="witnessContact[]"
-            required
-            placeholder="NÃO HOUVE"
-          />
-
-          <label for="witnessEmail">Email:</label>
-          <input
-            type="email"
-            id="witnessEmail"
-            name="witnessEmail[]"
-            required
-            placeholder="NÃO HOUVE"
-          />
-        </div>
+      <section class="form-section">
+        <div id="people-witness"></div>
+        <button
+          type="button"
+          class="button"
+          data-add="witness"
+          style="width: auto; margin-top: 15px"
+        >
+          <span class="shadow"></span><span class="edge"></span>
+          <div class="front" style="padding: 10px 20px; font-size: 1rem">
+            <span>+ TESTEMUNHA</span>
+          </div>
+        </button>
       </section>
 
       <h3>Geral</h3>
@@ -608,10 +523,9 @@
           <div class="note-text">
             <h3>6A → Sinistros sem danos ao patrimônio (coletivo):</h3>
             <p>
-              Para: Danilo Anunciação da Silva
-              &lt;danilo.silva@wolffsp.com&gt;, Sinistro Transwolff
-              &lt;sinistro@wolffsp.com&gt;, Beatriz Alves Silva
-              &lt;beatrizsinistro@wolffsp.com&gt;, Gustavo Santos Fim
+              Para: Danilo Anunciação da Silva &lt;danilo.silva@wolffsp.com&gt;,
+              Sinistro Transwolff &lt;sinistro@wolffsp.com&gt;, Beatriz Alves
+              Silva &lt;beatrizsinistro@wolffsp.com&gt;, Gustavo Santos Fim
               &lt;gustavosinistro@wolffsp.com&gt;, Maiane Lima Silva
               &lt;maianesinistro@wolffsp.com&gt;
             </p>
@@ -627,10 +541,9 @@
           <div class="note-text">
             <h3>6A → Sinistros com danos ao patrimônio (coletivo):</h3>
             <p>
-              Para: Danilo Anunciação da Silva
-              &lt;danilo.silva@wolffsp.com&gt;, Sinistro Transwolff
-              &lt;sinistro@wolffsp.com&gt;, Beatriz Alves Silva
-              &lt;beatrizsinistro@wolffsp.com&gt;, Gustavo Santos Fim
+              Para: Danilo Anunciação da Silva &lt;danilo.silva@wolffsp.com&gt;,
+              Sinistro Transwolff &lt;sinistro@wolffsp.com&gt;, Beatriz Alves
+              Silva &lt;beatrizsinistro@wolffsp.com&gt;, Gustavo Santos Fim
               &lt;gustavosinistro@wolffsp.com&gt;, Maiane Lima Silva
               &lt;maianesinistro@wolffsp.com&gt;, Funilaria D10
               &lt;funilariad10@wolffsp.com&gt;
@@ -650,10 +563,9 @@
               ao patrimônio (coletivo):
             </h3>
             <p>
-              Para: Danilo Anunciação da Silva
-              &lt;danilo.silva@wolffsp.com&gt;, Sinistro Transwolff
-              &lt;sinistro@wolffsp.com&gt;, Beatriz Alves Silva
-              &lt;beatrizsinistro@wolffsp.com&gt;, Gustavo Santos Fim
+              Para: Danilo Anunciação da Silva &lt;danilo.silva@wolffsp.com&gt;,
+              Sinistro Transwolff &lt;sinistro@wolffsp.com&gt;, Beatriz Alves
+              Silva &lt;beatrizsinistro@wolffsp.com&gt;, Gustavo Santos Fim
               &lt;gustavosinistro@wolffsp.com&gt;, Maiane Lima Silva
               &lt;maianesinistro@wolffsp.com&gt;, Treinamento Transwolff
               &lt;treinamento1@wolffsp.com&gt;
@@ -673,10 +585,9 @@
               ao patrimônio (coletivo):
             </h3>
             <p>
-              Para: Danilo Anunciação da Silva
-              &lt;danilo.silva@wolffsp.com&gt;, Sinistro Transwolff
-              &lt;sinistro@wolffsp.com&gt;, Beatriz Alves Silva
-              &lt;beatrizsinistro@wolffsp.com&gt;, Gustavo Santos Fim
+              Para: Danilo Anunciação da Silva &lt;danilo.silva@wolffsp.com&gt;,
+              Sinistro Transwolff &lt;sinistro@wolffsp.com&gt;, Beatriz Alves
+              Silva &lt;beatrizsinistro@wolffsp.com&gt;, Gustavo Santos Fim
               &lt;gustavosinistro@wolffsp.com&gt;, Maiane Lima Silva
               &lt;maianesinistro@wolffsp.com&gt;, Treinamento Transwolff
               &lt;treinamento1@wolffsp.com&gt;, Funilaria D10
@@ -696,10 +607,9 @@
               6A → Sinistros relacionados a furto de periféricos do coletivo:
             </h3>
             <p>
-              Para: Danilo Anunciação da Silva
-              &lt;danilo.silva@wolffsp.com&gt;, Sinistro Transwolff
-              &lt;sinistro@wolffsp.com&gt;, Beatriz Alves Silva
-              &lt;beatrizsinistro@wolffsp.com&gt;, Gustavo Santos Fim
+              Para: Danilo Anunciação da Silva &lt;danilo.silva@wolffsp.com&gt;,
+              Sinistro Transwolff &lt;sinistro@wolffsp.com&gt;, Beatriz Alves
+              Silva &lt;beatrizsinistro@wolffsp.com&gt;, Gustavo Santos Fim
               &lt;gustavosinistro@wolffsp.com&gt;, Maiane Lima Silva
               &lt;maianesinistro@wolffsp.com&gt;, Treinamento Transwolff
               &lt;treinamento1@wolffsp.com&gt;, Funilaria D10
@@ -976,4 +886,3 @@
     <script src="app.js"></script>
   </body>
 </html>
-

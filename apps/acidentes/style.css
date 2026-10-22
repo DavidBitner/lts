@@ -928,3 +928,23 @@ td {
     width: 100%;
   }
 }
+
+/* ========================================================================== */
+/* Pessoas (Motoristas, Vítimas, Terceiros, Testemunhas)                      */
+/* ========================================================================== */
+.person-entry + .person-entry {
+  margin-top: 25px;
+  padding-top: 10px;
+  border-top: 2px dashed #ccc;
+}
+
+.person-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 15px;
+}
+
+.person-head h5 {
+  margin: 10px 0;
+}

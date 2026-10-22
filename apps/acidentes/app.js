@@ -289,6 +289,216 @@
   }
 
   /* ========================================================================== */
+  /* People (Motoristas, Vítimas, Terceiros, Testemunhas)                       */
+  /* ========================================================================== */
+  const NO_DATA = "NÃO HOUVE";
+  const PEOPLE_KEY = "people";
+  const PEOPLE = {
+    driver: {
+      title: "Motorista",
+      list: "drivers",
+      required: true,
+      fields: [
+        ["Name", "Nome"],
+        ["Cpf", "CPF"],
+        ["Situation", "Situação"],
+      ],
+    },
+    victim: {
+      title: "Vítima",
+      list: "victims",
+      fields: [
+        ["Name", "Nome"],
+        ["Documentation", "Documentação"],
+        ["Situation", "Situação"],
+        ["Contact", "Contato"],
+      ],
+    },
+    thirdParty: {
+      title: "Terceiro",
+      list: "thirdParties",
+      fields: [
+        ["Name", "Nome"],
+        ["Documentation", "Documentação"],
+        ["Contact", "Contato"],
+      ],
+    },
+    witness: {
+      title: "Testemunha",
+      list: "witnesses",
+      fields: [
+        ["Name", "Nome"],
+        ["Documentation", "Documentação"],
+        ["Contact", "Contato"],
+        ["Email", "Email"],
+      ],
+    },
+  };
+
+  const people = {};
+
+  const blankPerson = (kind) =>
+    Object.fromEntries(PEOPLE[kind].fields.map(([key]) => [key, ""]));
+
+  function savePeople() {
+    store.set(PEOPLE_KEY, JSON.stringify(people));
+  }
+
+  function loadPeople() {
+    let saved = null;
+    try {
+      saved = JSON.parse(store.get(PEOPLE_KEY));
+    } catch (e) {}
+
+    Object.keys(PEOPLE).forEach((kind) => {
+      let list = saved && Array.isArray(saved[kind]) ? saved[kind] : [];
+      if (list.length === 0) {
+        const legacy = blankPerson(kind);
+        PEOPLE[kind].fields.forEach(([key]) => {
+          const v = store.get(kind + key);
+          if (v) legacy[key] = v;
+        });
+        list = [legacy];
+      }
+      people[kind] = list;
+    });
+  }
+
+  function resetPeople() {
+    Object.keys(PEOPLE).forEach((kind) => {
+      people[kind] = [blankPerson(kind)];
+    });
+    renderAllPeople();
+    refreshBoxes();
+  }
+
+  function renderPeople(kind) {
+    const cfg = PEOPLE[kind];
+    const box = byId("people-" + kind);
+    if (!box) return;
+    box.innerHTML = "";
+
+    const list = people[kind];
+    list.forEach((person, idx) => {
+      const entry = document.createElement("div");
+      entry.className = "person-entry";
+
+      const head = document.createElement("div");
+      head.className = "person-head";
+      const title = document.createElement("h5");
+      title.textContent =
+        list.length > 1 ? `${cfg.title} ${idx + 1}` : cfg.title;
+      head.appendChild(title);
+
+      if (list.length > 1) {
+        const btnRemove = document.createElement("button");
+        btnRemove.type = "button";
+        btnRemove.className = "button";
+        btnRemove.innerHTML = `<span class="shadow"></span><span class="edge"></span><div class="front" style="background:#777; padding:8px 16px; font-size:0.9rem"><span>REMOVER</span></div>`;
+        btnRemove.addEventListener("click", () => {
+          list.splice(idx, 1);
+          savePeople();
+          renderPeople(kind);
+          refreshBoxes();
+        });
+        head.appendChild(btnRemove);
+      }
+      entry.appendChild(head);
+
+      cfg.fields.forEach(([key, label]) => {
+        const inputId = `person-${kind}-${idx}-${key}`;
+        const lab = document.createElement("label");
+        lab.htmlFor = inputId;
+        lab.textContent = label + ":";
+
+        const input = document.createElement("input");
+        input.id = inputId;
+        input.type = key === "Email" ? "email" : "text";
+        input.placeholder = NO_DATA;
+        input.value = person[key] || "";
+        input.addEventListener("input", () => {
+          person[key] = input.value.trim();
+          savePeople();
+          refreshBoxes();
+        });
+
+        entry.appendChild(lab);
+        entry.appendChild(input);
+      });
+
+      box.appendChild(entry);
+    });
+  }
+
+  function renderAllPeople() {
+    Object.keys(PEOPLE).forEach(renderPeople);
+  }
+
+  function wirePeople() {
+    loadPeople();
+    renderAllPeople();
+    $$("[data-add]").forEach((btn) => {
+      btn.addEventListener("click", () => {
+        const kind = btn.dataset.add;
+        people[kind].push(blankPerson(kind));
+        savePeople();
+        renderPeople(kind);
+        const entries = $$(`#people-${kind} .person-entry`);
+        entries[entries.length - 1]?.querySelector("input")?.focus();
+      });
+    });
+  }
+
+  const personLabel = (kind, idx) =>
+    people[kind].length > 1
+      ? `${PEOPLE[kind].title} ${idx + 1}`
+      : PEOPLE[kind].title;
+
+  function collectPeople() {
+    const result = {};
+    for (const kind of Object.keys(PEOPLE)) {
+      const cfg = PEOPLE[kind];
+      const filled = [];
+
+      people[kind].forEach((person, idx) => {
+        const values = {};
+        cfg.fields.forEach(([key]) => {
+          values[key] = (person[key] || "").toUpperCase().trim();
+        });
+        if (Object.values(values).some(nonEmpty)) filled.push({ idx, values });
+      });
+
+      if (cfg.required) {
+        if (filled.length === 0) {
+          return {
+            error: `Preencha o <strong>${cfg.title}</strong>.`,
+          };
+        }
+        for (const { idx, values } of filled) {
+          for (const [key, label] of cfg.fields) {
+            if (!nonEmpty(values[key])) {
+              return {
+                error: `Preencha o campo <strong>${label}</strong> do <strong>${personLabel(kind, idx)}</strong>.`,
+              };
+            }
+          }
+        }
+      }
+
+      const rows = filled.length
+        ? filled.map((f) => f.values)
+        : [blankPerson(kind)];
+      result[kind] = rows.map((values, i) => ({
+        ...Object.fromEntries(
+          cfg.fields.map(([key]) => [kind + key, values[key] || NO_DATA]),
+        ),
+        [kind + "Num"]: rows.length > 1 ? ` ${i + 1}` : "",
+      }));
+    }
+    return result;
+  }
+
+  /* ========================================================================== */
   /* Persistence & Validation                                                   */
   /* ========================================================================== */
   function restoreField(el) {
@@ -379,23 +589,29 @@
     );
   }
 
-  function wireBoxes() {
-    const map = {
-      coletivo: "box-coletivo",
-      logradouro: "box-logradouro",
-      driverName: "box-condutor",
-      driverCpf: "box-cpf",
+  function refreshBoxes() {
+    const setBox = (id, value) => {
+      const out = byId(id);
+      if (out)
+        out.innerHTML = `<span class="label">${id.replace("box-", "")}:</span> ${escapeHtml(value)}`;
     };
-    const update = () =>
-      Object.entries(map).forEach(([inp, out]) => {
-        if (byId(inp) && byId(out))
-          byId(out).innerHTML =
-            `<span class="label">${byId(out).id.replace("box-", "")}:</span> ${byId(inp).value}`;
-      });
-    Object.keys(map).forEach((id) =>
-      byId(id)?.addEventListener("input", update),
+    const joinDrivers = (key) =>
+      (people.driver || [])
+        .map((p) => p[key])
+        .filter(nonEmpty)
+        .join(" / ");
+
+    setBox("box-coletivo", byId("coletivo")?.value || "");
+    setBox("box-logradouro", byId("logradouro")?.value || "");
+    setBox("box-condutor", joinDrivers("Name"));
+    setBox("box-cpf", joinDrivers("Cpf"));
+  }
+
+  function wireBoxes() {
+    ["coletivo", "logradouro"].forEach((id) =>
+      byId(id)?.addEventListener("input", refreshBoxes),
     );
-    update();
+    refreshBoxes();
   }
 
   async function loadTemplate() {
@@ -413,6 +629,7 @@
     attachedImages = [];
     imageDimensionsCache = {};
     renderGallery();
+    resetPeople();
     byId("excel")?.classList.add("hidden");
   }
 
@@ -434,25 +651,11 @@
         bairro: getVal("bairro"),
         inicioFato: getVal("inicioFato"),
         desfecho: getVal("desfecho"),
-        driverName: getVal("driverName"),
-        driverCpf: getVal("driverCpf"),
-        driverSituation: getVal("driverSituation"),
         cco: getVal("cco"),
         matricula: getVal("matricula"),
       };
 
       const extras = [
-        "victimName",
-        "victimDocumentation",
-        "victimSituation",
-        "victimContact",
-        "thirdPartyName",
-        "thirdPartyDocumentation",
-        "thirdPartyContact",
-        "witnessName",
-        "witnessDocumentation",
-        "witnessContact",
-        "witnessEmail",
         "prat",
         "pmvt",
         "pmvtr",
@@ -495,13 +698,11 @@
         return;
       if (!check(inputs.numero, "Preencha o <strong>Número</strong>.")) return;
       if (!check(inputs.bairro, "Preencha o <strong>Bairro</strong>.")) return;
-      if (!check(inputs.driverName, "Preencha o <strong>Motorista</strong>."))
+      const peopleData = collectPeople();
+      if (peopleData.error) {
+        ui.alert("Campo Obrigatório", peopleData.error);
         return;
-      if (!check(inputs.driverCpf, "Preencha o <strong>CPF</strong>.")) return;
-      if (
-        !check(inputs.driverSituation, "Preencha a <strong>Situação</strong>.")
-      )
-        return;
+      }
       if (
         !check(inputs.inicioFato, "Preencha o <strong>Início do Fato</strong>.")
       )
@@ -549,10 +750,16 @@
       });
 
       const fotosData = attachedImages.map((img) => ({ imagem: img.src }));
+      const joinField = (kind, key) =>
+        peopleData[kind].map((p) => p[kind + key]).join(" / ");
 
       doc.setData({
         ...inputs,
         ...extraData,
+        drivers: peopleData.driver,
+        victims: peopleData.victim,
+        thirdParties: peopleData.thirdParty,
+        witnesses: peopleData.witness,
         nOc: `${inputs.nOc}/${year}`,
         date: dateFmt,
         fotos: fotosData,
@@ -570,9 +777,9 @@
       setText("td-nOc", `${inputs.nOc}/${year}`);
       setText("td-date", dateFmt);
       setText("td-alerta", extraData.alerta);
-      setText("td-victimName", extraData.victimName);
-      setText("td-driverName", inputs.driverName);
-      setText("td-driverCpf", inputs.driverCpf);
+      setText("td-victimName", joinField("victim", "Name"));
+      setText("td-driverName", joinField("driver", "Name"));
+      setText("td-driverCpf", joinField("driver", "Cpf"));
       setText("td-coletivo", inputs.coletivo);
       setText("td-linha", inputs.linha);
       setText("td-ocorrencia", inputs.ocorrencia);
@@ -824,7 +1031,7 @@
       if (change.selected && texts[change.field] != null) {
         texts[change.field] = texts[change.field].replace(
           change.original,
-          change.replacement
+          change.replacement,
         );
       }
     });
@@ -841,7 +1048,7 @@
   function wireActions() {
     byId("btn-review-textos")?.addEventListener("click", requestTextReview);
     byId("btn-review-cancel")?.addEventListener("click", () =>
-      byId("modal-review").classList.remove("show")
+      byId("modal-review").classList.remove("show"),
     );
     byId("btn-review-apply")?.addEventListener("click", applyReviewChanges);
     resumeReviewCooldown();
@@ -1093,9 +1300,14 @@
           setV("logradouro", "GARAGEM UNIÃO");
           setV("numero", "244");
           setV("bairro", "JARDIM GUANABARA");
-          setV("driverName", "NÃO CABE");
-          setV("driverCpf", "-");
-          setV("driverSituation", "-");
+          Object.assign(people.driver[0], {
+            Name: "NÃO CABE",
+            Cpf: "-",
+            Situation: "-",
+          });
+          savePeople();
+          renderPeople("driver");
+          refreshBoxes();
           setV(
             "inicioFato",
             `INSPETOR OPERACIONAL __________ INFORMA, TRATA-SE DE UMA AVARIA ENCONTRADA NO COLETIVO ______, DENTRO DA GARAGEM UNIÃO, COLETIVO FOI ENCONTRADO PELO OPERACIONAL ÀS _________, NO ____________ COM A ______________ DANIFICADA.`,
@@ -1173,6 +1385,7 @@
 
   function init() {
     wirePersistence();
+    wirePeople();
     wireBoxes();
     wireValidators();
     wireActions();
@@ -1180,4 +1393,3 @@
 
   document.addEventListener("DOMContentLoaded", init);
 })();
-
