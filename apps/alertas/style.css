@@ -189,31 +189,6 @@ body {
 /* ========================================================================== */
 /* Botão Voltar                                                               */
 /* ========================================================================== */
-.back-home-btn {
-  flex-shrink: 0;
-  width: 40px;
-  height: 40px;
-  display: grid;
-  place-items: center;
-  border-radius: 50%;
-  background: var(--accent);
-  color: #000;
-  text-decoration: none;
-  transition:
-    transform 220ms ease,
-    background-color 180ms ease;
-}
-.back-home-btn:hover,
-.back-home-btn:focus-visible {
-  transform: scale(1.1);
-  background: #000;
-  color: var(--accent);
-  outline: 0;
-}
-.back-home-btn svg {
-  width: 24px;
-  height: 24px;
-}
 
 /* ========================================================================== */
 /* Editor (Quill)                                                             */
@@ -307,4 +282,42 @@ body {
     margin: 0 -14px;
     padding: 22px 14px 14px;
   }
+}
+
+.back-home-btn {
+  flex-shrink: 0;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  height: 36px;
+  padding: 0 16px 0 10px;
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  background: var(--surface-2);
+  color: var(--text);
+  font-size: 14px;
+  font-weight: 700;
+  text-decoration: none;
+  transition:
+    border-color 180ms ease,
+    color 180ms ease,
+    background-color 180ms ease;
+}
+
+.back-home-btn svg {
+  width: 18px;
+  height: 18px;
+  transition: transform 180ms ease;
+}
+
+.back-home-btn:hover,
+.back-home-btn:focus-visible {
+  border-color: var(--accent);
+  color: var(--accent);
+  outline: 0;
+}
+
+.back-home-btn:hover svg,
+.back-home-btn:focus-visible svg {
+  transform: translateX(-3px);
 }

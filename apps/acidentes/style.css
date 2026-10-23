@@ -273,7 +273,7 @@ h5 {
   text-transform: uppercase;
   margin: 0;
   min-width: 0;
-  max-width: 260px;
+  flex: 0 1 auto;
   padding: 5px 10px;
   border-radius: 8px;
   border: 1px solid var(--border);
@@ -438,16 +438,6 @@ h5 {
   .col-9 {
     grid-column: span 6;
   }
-  .topbar {
-    flex-wrap: wrap;
-  }
-  .context {
-    order: 3;
-    flex-basis: 100%;
-  }
-  .topbar-title {
-    flex: 1;
-  }
   html {
     scroll-padding-top: 150px;
   }
@@ -485,9 +475,6 @@ h5 {
   }
   .card-head {
     flex-wrap: wrap;
-  }
-  .context p {
-    max-width: none;
   }
 }
 
@@ -952,28 +939,6 @@ td {
 /* ========================================================================== */
 /* UI Flutuante (Botão Voltar, Painel Opções, Tooltips)                       */
 /* ========================================================================== */
-.back-home-btn {
-  flex-shrink: 0;
-  width: 40px;
-  height: 40px;
-  display: grid;
-  place-items: center;
-  border-radius: 50%;
-  background: var(--accent);
-  color: #000;
-  transition:
-    transform 220ms ease,
-    background-color 180ms ease;
-}
-.back-home-btn:hover {
-  transform: scale(1.1);
-  background: #000;
-  color: var(--accent);
-}
-.back-home-btn svg {
-  width: 24px;
-  height: 24px;
-}
 
 .opts-select {
   width: 190px;
@@ -1786,4 +1751,184 @@ td {
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 12px;
+}
+
+.back-home-btn {
+  flex-shrink: 0;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  height: 36px;
+  padding: 0 16px 0 10px;
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  background: var(--surface-2);
+  color: var(--text);
+  font-size: 14px;
+  font-weight: 700;
+  text-decoration: none;
+  transition:
+    border-color 180ms ease,
+    color 180ms ease,
+    background-color 180ms ease;
+}
+
+.back-home-btn svg {
+  width: 18px;
+  height: 18px;
+  transition: transform 180ms ease;
+}
+
+.back-home-btn:hover,
+.back-home-btn:focus-visible {
+  border-color: var(--accent);
+  color: var(--accent);
+  outline: 0;
+}
+
+.back-home-btn:hover svg,
+.back-home-btn:focus-visible svg {
+  transform: translateX(-3px);
+}
+
+.title-icon,
+.home-icon {
+  display: none;
+}
+
+.title-icon svg,
+.home-icon svg {
+  display: block;
+  width: 22px;
+  height: 22px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.topbar.is-compact .topbar-title {
+  display: grid;
+  place-items: center;
+  width: 36px;
+  height: 36px;
+  flex-shrink: 0;
+}
+
+.topbar.is-compact .title-text {
+  display: none;
+}
+
+.topbar.is-compact .title-icon {
+  display: block;
+}
+
+.topbar.is-compact .back-home-btn {
+  width: 36px;
+  padding: 0;
+  justify-content: center;
+}
+
+.topbar.is-compact .back-home-btn > svg,
+.topbar.is-compact .back-home-btn > span:not(.home-icon) {
+  display: none;
+}
+
+.topbar.is-compact .home-icon {
+  display: block;
+}
+
+.topbar.is-compact .home-icon svg {
+  width: 18px;
+  height: 18px;
+}
+
+
+.context p {
+  position: relative;
+  cursor: pointer;
+  user-select: none;
+  transition: border-color 160ms ease;
+}
+
+.context p:hover,
+.context p:focus-visible {
+  border-color: var(--accent);
+  outline: 0;
+}
+
+.context #box-nOc,
+.context #box-coletivo,
+.context #box-cpf {
+  flex-shrink: 0;
+}
+
+.context #box-condutor,
+.context #box-logradouro {
+  flex: 1 1 0;
+  max-width: max-content;
+}
+
+.context p.copied {
+  border-color: var(--ok);
+}
+
+.context p.copied::after {
+  content: "\2713  COPIADO";
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  border-radius: 7px;
+  background: var(--surface);
+  color: var(--ok);
+  font-weight: 800;
+  letter-spacing: 0.5px;
+}
+
+.context .label-icon {
+  display: none;
+  width: 15px;
+  height: 15px;
+  vertical-align: -3px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.topbar.is-icons .context .label-text {
+  display: none;
+}
+
+.topbar.is-icons .context .label-icon {
+  display: inline-block;
+}
+
+
+.topbar.is-tight .opts {
+  gap: 6px;
+}
+
+.topbar.is-tight .opts-select {
+  width: 112px;
+  padding: 0 4px;
+  font-size: 12px;
+}
+
+.topbar.is-tight .opts-apply {
+  padding: 0 10px;
+  font-size: 12px;
+}
+
+.topbar.is-wrapped .context {
+  order: 3;
+  flex-basis: 100%;
+  flex-wrap: wrap;
+}
+
+.topbar.is-wrapped .topbar-title {
+  flex: 1;
 }

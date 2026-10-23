@@ -617,6 +617,7 @@
   /* ------------------------------------------------------------------------ */
   function clearAll() {
     store.clearAll();
+    if (window.PageMap) window.PageMap.clearErrors();
     $$("input, textarea, select").forEach((input) => {
       if (input.type === "checkbox" || input.type === "radio")
         input.checked = false;
@@ -639,6 +640,7 @@
   }
 
   function reportMissing(items) {
+    if (window.PageMap) window.PageMap.showErrors();
     items.forEach(({ id }) => {
       const el = byId(id);
       if (!el) return;
@@ -1178,6 +1180,55 @@ LINHAS AFETADAS: _________________________`,
   /* ------------------------------------------------------------------------ */
   /* Init                                                                     */
   /* ------------------------------------------------------------------------ */
+  function initPageMap() {
+    if (!window.PageMap) return;
+    const val = (id) => (byId(id)?.value || "").trim();
+    const item = (id, label, ok) => ({ id, label, ok });
+    const filled = (id, label) => item(id, label, nonEmpty(val(id)));
+
+    window.PageMap.init({
+      groups: [
+        {
+          section: "sec-identificacao",
+          items: () => [
+            item("nOc", "Nº OC", /^6C\d{4}$/.test(val("nOc").toUpperCase())),
+            filled("ocorrencia", "Ocorrência"),
+          ],
+        },
+        {
+          section: "sec-horario",
+          items: () => {
+            const list = [
+              item("date", "Data", !!parseBrDate(val("date"))),
+              item("inicio", "Início", TIME_PATTERN.test(val("inicio"))),
+            ];
+            if (nonEmpty(val("termino")))
+              list.push(
+                item("termino", "Término", TIME_PATTERN.test(val("termino"))),
+              );
+            return list;
+          },
+        },
+        {
+          section: "sec-endereco",
+          items: () => [
+            filled("logradouro", "Logradouro"),
+            filled("numero", "Número"),
+            filled("bairro", "Bairro"),
+          ],
+        },
+        {
+          section: "sec-descricao",
+          items: () => [filled("inicioFato", "Corpo da Ocorrência")],
+        },
+        { section: "sec-detalhamento" },
+        { section: "sec-sptrans", label: "SPTrans" },
+        { section: "sec-interno", items: () => [filled("cco", "CCO")] },
+        { section: "sec-imagens", label: "Imagens" },
+      ],
+    });
+  }
+
   function init() {
     wirePersistence();
     wireValidators();
@@ -1186,6 +1237,7 @@ LINHAS AFETADAS: _________________________`,
     wireModal();
     wireActions();
     wireOptionsPanel();
+    initPageMap();
   }
 
   document.addEventListener("DOMContentLoaded", init);

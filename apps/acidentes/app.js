@@ -690,6 +690,7 @@
   }
 
   function reportMissing(items) {
+    if (window.PageMap) window.PageMap.showErrors();
     items.forEach(({ id }) => {
       const el = byId(id);
       if (!el) return;
@@ -869,12 +870,83 @@
     });
   }
 
+  function updateTopbarCompact() {
+    const bar = document.querySelector(".topbar");
+    if (!bar) return;
+    const all = ["is-tight", "is-compact", "is-icons", "is-wrapped"];
+    const isCut = (p) => {
+      const cs = getComputedStyle(p);
+      const box =
+        p.getBoundingClientRect().width -
+        parseFloat(cs.paddingLeft) -
+        parseFloat(cs.paddingRight) -
+        parseFloat(cs.borderLeftWidth) -
+        parseFloat(cs.borderRightWidth);
+      const range = document.createRange();
+      range.selectNodeContents(p);
+      return (
+        range.getBoundingClientRect().width > box + 0.01 ||
+        p.scrollWidth > p.clientWidth
+      );
+    };
+    const truncated = () => $$(".context p").some(isCut);
+
+    bar.classList.remove(...all);
+    if (document.body.classList.contains("pm-mobile")) return;
+    if (!truncated()) return;
+    for (const stage of ["is-tight", "is-compact", "is-icons"]) {
+      bar.classList.add(stage);
+      if (!truncated()) return;
+    }
+    bar.classList.remove(...all);
+    bar.classList.add("is-wrapped");
+    if (truncated()) bar.classList.add("is-icons");
+  }
+
   function refreshBoxes() {
-    const boxLabels = { "box-nOc": "Nº OC" };
+    const svg = (paths) =>
+      `<svg class="label-icon" viewBox="0 0 24 24" aria-hidden="true">${paths}</svg>`;
+    const boxMeta = {
+      "box-nOc": {
+        label: "Nº OC",
+        icon: svg('<path d="M4 9h16M4 15h16M10 3L8 21M16 3l-2 18"/>'),
+      },
+      "box-coletivo": {
+        label: "Coletivo",
+        icon: svg(
+          '<path d="M4 6a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v10H4z"/><path d="M4 11h16"/><circle cx="8" cy="19" r="1.5"/><circle cx="16" cy="19" r="1.5"/>',
+        ),
+      },
+      "box-condutor": {
+        label: "Condutor",
+        icon: svg(
+          '<circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="2"/><path d="M3 12h7M14 12h7M12 14v7"/>',
+        ),
+      },
+      "box-cpf": {
+        label: "CPF",
+        icon: svg(
+          '<rect x="3" y="5" width="18" height="14" rx="2"/><circle cx="9" cy="11" r="2"/><path d="M6 16c.5-1.5 5.5-1.5 6 0M14 10h4M14 14h4"/>',
+        ),
+      },
+      "box-logradouro": {
+        label: "Logradouro",
+        icon: svg(
+          '<path d="M12 21s7-6.2 7-11a7 7 0 1 0-14 0c0 4.8 7 11 7 11z"/><circle cx="12" cy="10" r="2.5"/>',
+        ),
+      },
+    };
     const setBox = (id, value) => {
       const out = byId(id);
-      if (out)
-        out.innerHTML = `<span class="label">${boxLabels[id] || id.replace("box-", "")}:</span> ${escapeHtml(value)}`;
+      if (!out) return;
+      const meta = boxMeta[id];
+      out.innerHTML = `<span class="label"><span class="label-text">${meta.label}:</span>${meta.icon}</span> ${escapeHtml(value)}`;
+      out.dataset.value = value || "";
+      out.setAttribute("role", "button");
+      out.tabIndex = 0;
+      out.title = nonEmpty(value)
+        ? `${meta.label}: ${value} (clique para copiar)`
+        : `${meta.label}: vazio`;
     };
     const joinDrivers = (key) =>
       (people.driver || [])
@@ -887,9 +959,84 @@
     setBox("box-logradouro", byId("logradouro")?.value || "");
     setBox("box-condutor", joinDrivers("Name"));
     setBox("box-cpf", joinDrivers("Cpf"));
+    updateTopbarCompact();
+  }
+
+  function copyBoxValue(box) {
+    const value = (box.dataset.value || "").trim().toUpperCase();
+    if (!value) return;
+    const done = () => {
+      box.classList.add("copied");
+      setTimeout(() => box.classList.remove("copied"), 900);
+    };
+    const fallback = () => {
+      const ta = document.createElement("textarea");
+      ta.value = value;
+      ta.style.position = "fixed";
+      ta.style.opacity = "0";
+      document.body.appendChild(ta);
+      ta.select();
+      try {
+        document.execCommand("copy");
+        done();
+      } catch (_) {}
+      ta.remove();
+    };
+    if (navigator.clipboard && navigator.clipboard.writeText)
+      navigator.clipboard.writeText(value).then(done, fallback);
+    else fallback();
+  }
+
+  function wireBoxCopy() {
+    const context = $(".context");
+    if (!context) return;
+    context.addEventListener("click", (e) => {
+      const box = e.target.closest("p");
+      if (box) copyBoxValue(box);
+    });
+    context.addEventListener("keydown", (e) => {
+      if (e.key !== "Enter" && e.key !== " ") return;
+      const box = e.target.closest("p");
+      if (!box) return;
+      e.preventDefault();
+      copyBoxValue(box);
+    });
   }
 
   function wireBoxes() {
+    wireBoxCopy();
+    const topbarEl = document.querySelector(".topbar");
+    if (topbarEl && window.ResizeObserver) {
+      let lastWidth = 0;
+      let busy = false;
+      const run = () => {
+        busy = true;
+        updateTopbarCompact();
+        requestAnimationFrame(() => (busy = false));
+      };
+      new ResizeObserver((entries) => {
+        if (busy) return;
+        const width = Math.round(entries[0].contentRect.width);
+        if (width === lastWidth) return;
+        lastWidth = width;
+        run();
+      }).observe(topbarEl);
+      window.addEventListener("load", run);
+      const ctx = document.querySelector(".context");
+      if (ctx && window.MutationObserver) {
+        let queued = false;
+        new MutationObserver(() => {
+          if (queued) return;
+          queued = true;
+          requestAnimationFrame(() => {
+            queued = false;
+            run();
+          });
+        }).observe(ctx, { childList: true, characterData: true, subtree: true, attributes: true, attributeFilter: ["data-value"] });
+      }
+    }
+    if (document.fonts && document.fonts.ready)
+      document.fonts.ready.then(updateTopbarCompact);
     ["nOc", "coletivo", "logradouro"].forEach((id) =>
       byId(id)?.addEventListener("input", refreshBoxes),
     );
@@ -904,6 +1051,7 @@
 
   function clearAll() {
     store.clearAll();
+    if (window.PageMap) window.PageMap.clearErrors();
     $$("input, textarea, select").forEach((el) => {
       if (el.type === "checkbox") el.checked = false;
       else el.value = "";
@@ -1767,6 +1915,82 @@
     });
   }
 
+  function initPageMap() {
+    if (!window.PageMap) return;
+    const val = (id) => (byId(id)?.value || "").trim();
+    const item = (id, label, ok) => ({ id, label, ok });
+    const filled = (id, label) => item(id, label, nonEmpty(val(id)));
+    const matches = (id, label, re) =>
+      item(id, label, re.test(val(id).toUpperCase()));
+
+    const driverItems = () => {
+      const cfg = PEOPLE.driver;
+      const list = people.driver || [];
+      const used = list
+        .map((p, idx) => ({ p, idx }))
+        .filter(({ p }) => cfg.fields.some(([k]) => nonEmpty(p[k])));
+      const rows = used.length ? used : [{ p: list[0] || {}, idx: 0 }];
+      return rows.flatMap(({ p, idx }) =>
+        cfg.fields.map(([k, label]) =>
+          item(
+            `person-driver-${idx}-${k}`,
+            `${label} do ${personLabel("driver", idx)}`,
+            nonEmpty(p[k]),
+          ),
+        ),
+      );
+    };
+
+    window.PageMap.init({
+      groups: [
+        {
+          section: "sec-identificacao",
+          items: () => [
+            matches("nOc", "Nº OC", /^6A\d{4}$/),
+            filled("ocorrencia", "Ocorrência"),
+            matches("coletivo", "Coletivo", /^\d{5}( X \d{5})?$/),
+            matches("linha", "Linha", /^[A-Z0-9]{4}-[A-Z0-9]{2}$/),
+          ],
+        },
+        {
+          section: "sec-data",
+          items: () => [
+            item("date", "Data", !!parseBrDate(val("date"))),
+            item("time", "Hora", TIME_PATTERN.test(val("time"))),
+          ],
+        },
+        {
+          section: "sec-endereco",
+          items: () => [
+            filled("logradouro", "Endereço"),
+            matches("numero", "Número", /^(\d+|-)$/),
+            filled("bairro", "Bairro"),
+          ],
+        },
+        { section: "sec-motorista", items: driverItems },
+        {
+          section: "sec-descricao",
+          items: () => [
+            filled("inicioFato", "Início do Fato"),
+            filled("desfecho", "Desfecho"),
+          ],
+        },
+        { section: "sec-vitima" },
+        { section: "sec-terceiro" },
+        { section: "sec-testemunha" },
+        { section: "sec-acionamentos", label: "Acionamentos" },
+        {
+          section: "sec-interno",
+          items: () => [
+            filled("cco", "CCO"),
+            filled("matricula", "Matrícula"),
+          ],
+        },
+        { section: "sec-imagens", label: "Imagens" },
+      ],
+    });
+  }
+
   function init() {
     wirePersistence();
     wirePeople();
@@ -1775,6 +1999,7 @@
     wireTimeInputs(["time"]);
     wireDateInput();
     wireActions();
+    initPageMap();
   }
 
   document.addEventListener("DOMContentLoaded", init);
