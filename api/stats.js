@@ -6,6 +6,7 @@ const LABELS = {
   word: "Word",
   word_pdf: "Word + PDF",
   copy: "Copiar",
+  coords: "Coordenadas",
 };
 
 const esc = (s) =>

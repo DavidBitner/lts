@@ -1001,6 +1001,7 @@
               const newBtn = btnConfirmMap.cloneNode(true);
               btnConfirmMap.parentNode.replaceChild(newBtn, btnConfirmMap);
               newBtn.addEventListener("click", () => {
+                trackEvent("coords");
                 logradouroInput.value = finalStreet;
                 numeroInput.value = finalNumber;
                 bairroInput.value = finalBairro;

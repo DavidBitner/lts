@@ -1,5 +1,5 @@
 const APPS = ["acidentes", "ocorrencias", "alertas"];
-const TYPES = ["word", "word_pdf", "copy"];
+const TYPES = ["word", "word_pdf", "copy", "coords"];
 const EVENTS_KEY = "lts:events";
 const TOTALS_KEY = "lts:totals";
 const MAX_EVENTS = 20000;
